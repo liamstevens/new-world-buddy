@@ -1,0 +1,4 @@
+**/nwdb.info
+*.pyc
+*.tmp
+*.log
