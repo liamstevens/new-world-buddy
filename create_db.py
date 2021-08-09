@@ -118,6 +118,8 @@ if __name__ == "__main__":
     dbconn = postgresql.open(f'pq://{dbuser}:{dbpass}@{dbhost}:{dbport}/nwdb')
     
     #create_table(dbconn, "item","/Users/ljs/Projects/new-world-buddy/nwdb.info/db/item")
+    create_table(dbconn, "recipe","/Users/ljs/Projects/new-world-buddy/nwdb.info/db/recipe")
     #create_item_table_manual(dbconn)
-    populate_table(dbconn,"item","/Users/ljs/Projects/new-world-buddy/nwdb.info/db/item")
+    populate_table(dbconn,"recipe","/Users/ljs/Projects/new-world-buddy/nwdb.info/db/recipe")
+    #populate_table(dbconn,"item","/Users/ljs/Projects/new-world-buddy/nwdb.info/db/item")
 
