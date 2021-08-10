@@ -2,6 +2,8 @@ import json
 import boto3
 import os
 
+AWS_ACCESS_ID = os.environ["AWS_ACCESS_ID"]
+AWS_ACCESS_KEY = os.environ["AWS_ACCESS_KEY"]
 
 class CraftPath:
     _name = ""
@@ -17,6 +19,7 @@ class CraftPath:
         _profession = prof
         _start_level = start
         _target_level = finish
+        _client = boto3.Session(AWS_ACCESS_ID, AWS_ACCESS_KEY, "ap-southeast-2").client("dynamodb")
 
     def get_profession(self):
         return self._profession
@@ -46,6 +49,9 @@ class CraftPath:
             self._ingredients_to_collect.append(i)
         return self._ingredients_to_collect
 
+    def get_client(self):
+        return self._client
+
     def get_exp_to_next(self):
         #look up exp to next level
         with open('db_exp.json') as f:
@@ -57,9 +63,21 @@ class CraftPath:
                 break
         return required_exp
 
-    def find_recipes(self):
+    def query_recipes(self):
         #perform lookup for all recipes currently available
+        #Returns array of serialised recipe DDB entries
+        client = self.get_client()
+        recipes = client.query(
+            TableName="CraftingRecipes",
+            KeyConditionExpression='tradeskill = :tradeskill AND recipelevel >= :recipelevel',
+            ExpressionAttributeValues = {
+                ':tradeskill': {'S': self.get_profession()},
+                ':recipelevel' : {'N' : self.get_current()}
+            }
+        )
+        return recipes['Items']
+
 
     def traverse_recipes(self):
-        for e in self.get_recipes():
-            
+        #for e in self.get_recipes():
+        return
