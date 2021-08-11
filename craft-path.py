@@ -1,6 +1,8 @@
 import json
 import boto3
 import os
+import base64
+
 
 AWS_ACCESS_ID = os.environ["AWS_ACCESS_ID"]
 AWS_ACCESS_KEY = os.environ["AWS_ACCESS_KEY"]
@@ -77,6 +79,9 @@ class CraftPath:
         )
         return recipes['Items']
 
+    def decode_ingredients(self,recipes):
+        for e in recipes:
+            ingredients = base64.b64decode(json.loads(e["ingredients"]))
 
     def traverse_recipes(self):
         #for e in self.get_recipes():
