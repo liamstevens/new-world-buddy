@@ -80,8 +80,16 @@ class CraftPath:
         return recipes['Items']
 
     def decode_ingredients(self,recipes):
+        #ingredients list
+        candidate_ingredients = []
         for e in recipes:
-            ingredients = base64.b64decode(json.loads(e["ingredients"]))
+            ingredients = json.loads(base64.b64decode(e["ingredients"]))
+            for e in ingredients:
+                if e["type"] == "item":
+                    candidate_ingredients.append({"quantity":e["quantity"], "choices": e["name"]})
+                elif e["type"] == "category":
+                    candidate_ingredients.append({"quantity":e["quantity"], "choices": [f["name"] for f in e["subingredients"]]})
+        return candidate_ingredients
 
     def traverse_recipes(self):
         #for e in self.get_recipes():
