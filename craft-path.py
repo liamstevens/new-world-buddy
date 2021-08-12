@@ -82,15 +82,25 @@ class CraftPath:
     def decode_ingredients(self,recipes):
         #ingredients list
         candidate_ingredients = []
+        
         for e in recipes:
+            num_ingredients = 0
+            exp_gain = 0
+            ing_list = []
             ingredients = json.loads(base64.b64decode(e["ingredients"]))
             for e in ingredients:
+                num_ingredients += e["quantity"]
                 if e["type"] == "item":
-                    candidate_ingredients.append({"quantity":e["quantity"], "choices": e["name"]})
+                    ing_list.append({"quantity":e["quantity"], "choices": e["name"]})
                 elif e["type"] == "category":
-                    candidate_ingredients.append({"quantity":e["quantity"], "choices": [f["name"] for f in e["subingredients"]]})
+                    ing_list.append({"quantity":e["quantity"], "choices": [f["name"] for f in e["subingredients"]]})
+            if "CategoricalProgressionReward" in e["event"].keys():
+                exp_gain += (e["event"]["CategoricalProgressionReward"]*num_ingredients)
+            candidate_ingredients.append({e["name"]:ing_list,"exp_gain": exp_gain} )
         return candidate_ingredients
 
     def traverse_recipes(self):
         #for e in self.get_recipes():
         return
+
+#TODO prioritise ingredients by lowest tier and rarity, followed by weight
