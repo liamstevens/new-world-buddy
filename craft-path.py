@@ -82,7 +82,7 @@ class CraftPath:
     def decode_ingredients(self,recipes):
         #ingredients list
         candidate_ingredients = []
-        
+        #Loop through the list of recipes and extract a mapping of ingredients with a total experience gain per recipe
         for e in recipes:
             num_ingredients = 0
             exp_gain = 0
@@ -102,5 +102,25 @@ class CraftPath:
     def traverse_recipes(self):
         #for e in self.get_recipes():
         return
+    '''
+    Cost definition:
+        Cost = ((Tier+Rarity) * Quantity) * Scarcity
 
-#TODO prioritise ingredients by lowest tier and rarity, followed by weight
+        Scarcity is the opinionated component of this. Base scarcity is 1 for a flat value.
+        Raw materials such as stone, flint, wood, are all base level scarcity as they are easy to obtain.
+        
+        Harder to obtain materials such as ingots have scarcity > 1.
+        Rarer materials again such as motes have increasingly high scarcity.
+
+    '''
+    def optimise_cost(self, recipe_map):
+        #Loop through the map and compute the lowest cost of crafting
+        for e in recipe_map:
+
+
+
+
+
+
+#TODO prioritise ingredients by lowest tier and rarity, followed by weight to produce a cost for each. Use weight as a tiebreaker?
+#Consider introducing "scarcity" modifier that increases the overall cost of each ingredient.
