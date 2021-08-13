@@ -2,6 +2,7 @@ import json
 import boto3
 import os
 import base64
+import re
 
 
 AWS_ACCESS_ID = os.environ["AWS_ACCESS_ID"]
@@ -96,7 +97,7 @@ class CraftPath:
                     ing_list.append({"quantity":e["quantity"], "choices": [f["name"] for f in e["subingredients"]]})
             if "CategoricalProgressionReward" in e["event"].keys():
                 exp_gain += (e["event"]["CategoricalProgressionReward"]*num_ingredients)
-            candidate_ingredients.append({e["name"]:ing_list,"exp_gain": exp_gain} )
+            candidate_ingredients.append({"name":e["name"], "ingredients":ing_list,"exp_gain": exp_gain} )
         return candidate_ingredients
 
     def traverse_recipes(self):
@@ -114,13 +115,33 @@ class CraftPath:
 
     '''
     def optimise_cost(self, recipe_map):
+        tier_re = 't\d'
         #Loop through the map and compute the lowest cost of crafting
-        for e in recipe_map:
+        recipe_cost = []
+        for recipe in recipe_map:
+            choice_cost = []
+            for ingredients in recipe["ingredients"]:
+                #TODO actual weights to be added to dynamodb tables for each item.
+                #in the meantime manually weight stone, flint and wood tier as 1 and the rest as 2.
+                for ing in ingredients:
+                    choices = ing["choices"]
+                    #TODO once DDB tables with weights have been established, consider implementing logic that looks at contents of itemClass member in json blob
+                    #TODO add tiebreakers based on item weight
+                    for choice in choices:
+                        choice["tier"] = int(re.search(tier_re,choice["id"]))[-1]
+                        if ["stone", "flint", "wood"] in choice["name"].lower():
+                            choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*1})
+                            break
+                        else:
+                            choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*2})
+                            break
+            
+            recipe_cost.append({"name": recipe["name"], "ingredients":choice_cost})
+        return recipe_cost
 
 
 
 
 
 
-#TODO prioritise ingredients by lowest tier and rarity, followed by weight to produce a cost for each. Use weight as a tiebreaker?
-#Consider introducing "scarcity" modifier that increases the overall cost of each ingredient.
+
