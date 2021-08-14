@@ -22,7 +22,7 @@ class CraftPath:
         _profession = prof
         _start_level = start
         _target_level = finish
-        _client = boto3.Session(AWS_ACCESS_ID, AWS_ACCESS_KEY, "ap-southeast-2").client("dynamodb")
+        _client = boto3.Session(AWS_ACCESS_ID, AWS_ACCESS_KEY, region_name="ap-southeast-2").client("dynamodb")
 
     def get_profession(self):
         return self._profession
