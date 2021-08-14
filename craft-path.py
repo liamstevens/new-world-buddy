@@ -121,7 +121,7 @@ class CraftPath:
         for recipe in recipe_map:
             choice_cost = []
             for ingredients in recipe["ingredients"]:
-                #TODO actual weights to be added to dynamodb tables for each item.
+                #TODO: Create DDB tables with weights - https:///projects/NWB/issues/NWB-1O actual weights to be added to dynamodb tables for each item.
                 #in the meantime manually weight stone, flint and wood tier as 1 and the rest as 2.
                 for ing in ingredients:
                     choices = ing["choices"]
