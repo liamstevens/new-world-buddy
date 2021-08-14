@@ -20,7 +20,7 @@ resource "aws_dynamodb_table" "recipe_table" {
 
     attribute {
       name = "ingredients"
-      type = "S"
+      type = "B"
     }
 
     ttl {
