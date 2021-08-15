@@ -19,6 +19,11 @@ resource "aws_dynamodb_table" "recipe_table" {
     }
 
     attribute {
+      name = "name"
+      type = "S"
+    }
+
+    attribute {
       name = "ingredients"
       type = "B"
     }
