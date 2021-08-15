@@ -20,7 +20,13 @@ def upload_recipe(json):
         Item={
             'tradeskill' : json["tradeskill"],
             'recipelevel' : json["recipelevel"],
-            'ingredients' : base64.base64.b64encode(json["ingredients"])
+            'ingredients' : base64.base64.b64encode(json["ingredients"]),
+            'name' : json["id"]
         }
     )
     return response
+
+
+
+if __name__ == "__main__":
+    print(load_json("./nwdb.info/db/recipe/Woodworker_ClothWeaveT3.json"))
