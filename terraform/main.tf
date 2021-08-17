@@ -21,23 +21,23 @@ resource "aws_dynamodb_table" "recipe_table" {
     read_capacity = 25
     write_capacity = 25
     hash_key = "tradeskill"
-    range_key = "recipelevel"
+    range_key = "name"
 
     attribute {
       name = "tradeskill"
       type = "S"
     }
 
-    attribute {
+    /*attribute {
       name = "recipelevel"
       type = "N"
-    }
-/*
+    }*/
+
     attribute {
       name = "name"
       type = "S"
     }
-
+/*
     attribute {
       name = "ingredients"
       type = "B"
