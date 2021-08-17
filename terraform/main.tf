@@ -1,3 +1,18 @@
+terraform {
+  backend "remote" {
+    hostname = "app.terraform.io"
+    organization = "feedback-engineering"
+
+    workspaces {
+      name = "new-world-buddy"
+    }
+  }
+}
+
+provider "aws" {
+  region = "ap-southeast-2"
+}
+
 #DynamoDB
 
 resource "aws_dynamodb_table" "recipe_table" {
@@ -17,7 +32,7 @@ resource "aws_dynamodb_table" "recipe_table" {
       name = "recipelevel"
       type = "N"
     }
-
+/*
     attribute {
       name = "name"
       type = "S"
@@ -27,7 +42,7 @@ resource "aws_dynamodb_table" "recipe_table" {
       name = "ingredients"
       type = "B"
     }
-
+*/
     ttl {
     attribute_name = "TimeToExist"
     enabled        = false
