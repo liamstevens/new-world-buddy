@@ -22,6 +22,7 @@ class CraftPath:
         self._name = name
         self._profession = prof
         self._start_level = start
+        self._current_level = self._start_level
         self._target_level = finish
         self._client = boto3.Session(AWS_ACCESS_ID, AWS_ACCESS_KEY, region_name="ap-southeast-2").client("dynamodb")
        
@@ -73,6 +74,7 @@ class CraftPath:
     def query_recipes(self):
         #perform lookup for all recipes currently available
         #Returns array of serialised recipe DDB entries
+        #items = []
         client = self.get_client()
         recipes = client.query(
             TableName="CraftingRecipes",
@@ -83,7 +85,34 @@ class CraftPath:
                 ':recipelevel' : {'N' : str(self.get_current())}
             }
         )
-        return recipes['Items']
+        #print("Query results:")
+        #print(recipes)
+        #for rec in recipes["Items"]:
+         #   print(rec)
+        #print(recipes)
+        '''
+        items.append(recipes['Items'])
+        try:
+            lastkey = recipes['LastEvaluatedKey']
+            if 'LastEvaluatedKey' in recipes.keys():
+                while recipes['LastEvaluatedKey']:
+                    recipes = client.query(
+                    TableName="CraftingRecipes",
+                    KeyConditionExpression='tradeskill = :tradeskill',
+                    FilterExpression="recipelevel <= :recipelevel",
+                    ExpressionAttributeValues = {
+                        ':tradeskill': {'S': self.get_profession()},
+                        ':recipelevel' : {'N' : str(self.get_current())}
+                    },
+                    ExclusiveStartKey=lastkey
+                )
+                items.append(recipes['Items'])
+                if 'LastEvaluatedKey' not in recipes.keys():
+                    return items
+        except:
+            print("No Lastkey received")
+        #return items'''
+        return recipes["Items"]
 
     def decode_ingredients(self,recipes):
         #ingredients list
@@ -97,21 +126,25 @@ class CraftPath:
                 #print((base64.b64decode(e["ingredients"]["B"])).decode('utf-8').replace('\'','\"'))
                 ingredients = json.loads((base64.b64decode(e["ingredients"]["B"])).decode('utf-8').replace('\'','\"'))
                 event = json.loads((base64.b64decode(e["event"]["B"])).decode('utf-8').replace('\'','\"'))
-                for e in ingredients:
-                    num_ingredients += e["quantity"]
-                    if e["type"] == "item":
-                        ing_list.append({"quantity":e["quantity"], "choices": e["name"]})
-                    elif e["type"] == "category":
-                        ing_list.append({"quantity":e["quantity"], "choices": [f["name"] for f in e["subIngredients"]]})
+                for ing in ingredients:
+                    num_ingredients += ing["quantity"]
+                    if ing["type"] == "item":
+                        ing_list.append({"quantity":ing["quantity"], "choices": ing["name"]})
+                    elif ing["type"] == "category":
+                        ing_list.append({"quantity":ing["quantity"], "choices": [f for f in ing["subIngredients"]]})
                 if "CategoricalProgressionReward" in event.keys():
                     exp_gain += (event["CategoricalProgressionReward"]*num_ingredients)
                 candidate_ingredients.append({"name":e["name"], "ingredients":ing_list,"exp_gain": exp_gain} )
-            except KeyError as e:
-                print(f"Keyerror:{e}")
+            except KeyError as exc:
+                print(f"Keyerror:{exc} - {e['name']}")
                 continue
-            except Exception as e:
-                print(f"Unexpected error: {e}")
+            except Exception as exc:
+                print(f"Unexpected error: {exc} - {e}")
                 continue
+        #print("Decoded results:")
+        #for rec in candidate_ingredients:
+        #    print(rec)
+        #print(candidate_ingredients)
         return candidate_ingredients
 
     def traverse_recipes(self):
@@ -128,39 +161,107 @@ class CraftPath:
         Rarer materials again such as motes have increasingly high scarcity.
 
     '''
-    def optimise_cost(self, recipe_map):
+    def determine_cost(self, recipe_map):
         tier_re = 't\d'
-        #Loop through the map and compute the lowest cost of crafting
+        #Loop through the map and compute the cost of crafting
         recipe_cost = []
         for recipe in recipe_map:
-            choice_cost = []
-            print(recipe)
-            for ingredients in recipe["ingredients"]:
+            recipe["weighted_ings"] = []
+
+            for ing in recipe["ingredients"]:
+                choice_cost = []
                 #TODO: Create DDB tables with weights - https:///projects/NWB/issues/NWB-1O actual weights to be added to dynamodb tables for each item.
                 #in the meantime manually weight stone, flint and wood tier as 1 and the rest as 2.
-                for ing in ingredients:
-                    choices = ing["choices"]
-                    #TODO once DDB tables with weights have been established, consider implementing logic that looks at contents of itemClass member in json blob
-                    #TODO add tiebreakers based on item weight
-                    for choice in choices:
-                        choice["tier"] = int(re.search(tier_re,choice["id"]))[-1]
-                        if ["stone", "flint", "wood"] in choice["name"].lower():
-                            choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*1})
-                            break
+                choices = ing["choices"]
+                #TODO once DDB tables with weights have been established, consider implementing logic that looks at contents of itemClass member in json blob
+                #TODO add tiebreakers based on item weight
+                for choice in choices:
+                    if type(choices) == str:
+                        if any(res in choices.lower() for res in ["stone", "flint", "wood", "water"]):
+                            if "mote" not in choices.lower():
+                                choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*1})
+                                
                         else:
-                            choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*2})
+                            #Choice is likely a quest item or raw material, skip this recipe.
                             break
-            
-            recipe_cost.append({"name": recipe["name"], "ingredients":choice_cost})
+                    else:
+                        try:
+                            choice["tier"] = int(re.search(tier_re,choice["id"]).group(0)[-1])
+                            if any(res in choice["name"].lower() for res in ["stone", "flint", "wood", "water"]):
+                                choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*1})
+                            else:
+                                choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*2})
+                        except Exception as e:
+                            print(f"Unexpected exception: {e}")
+                            #print(f"Choice ({choice}) is likely a quest item, skip this recipe:{recipe['name']}.")
+                            continue
+                recipe["weighted_ings"].append(choice_cost)            
+            recipe_cost.append({"name": recipe["name"], "ingredients":recipe["weighted_ings"],"exp_gain": recipe["exp_gain"]})
+        for rec in recipe_cost:
+            if len(rec["ingredients"]) < 1 or any(not ing for ing in rec["ingredients"]):
+                recipe_cost.remove(rec)
         return recipe_cost
 
 
+    def optimise_cost(self,recipe_cost):
+        optimised_rec = []
+        for rec in recipe_cost:
+            o = {}
+            o['name'] = rec['name']
+            o['ingredients'] = []
+            o['exp_gain'] = rec['exp_gain']
+            for items in rec['ingredients']:
+                try:
+                    mincost = items[0]
+                    for item in items:
+                        if item['cost'] < mincost['cost']:
+                            mincost = item
+                    o['ingredients'].append(mincost)
+                except IndexError:
+                    #Somehow a recipe that shouldn't be here has fallen through. Remove it.
+                    continue
+            optimised_rec.append(o)                    
+        return optimised_rec
+                    
+    def select_best(self, optimised_recipes):
+        best = {'total_cost':50,'exp_gain':0}
+        for recipe in optimised_recipes:
+            #compute experience/cost
+            try:
+                empty_ing = False
+                recipe['total_cost'] = 0
+                for ing in recipe['ingredients']:
+                    if ing == []:
+                        empty_ing = True
+                        break
+                    else:
+                        recipe['total_cost']+=ing['cost']
+                if empty_ing == True:
+                    continue
+                ratio = recipe['exp_gain']/recipe['total_cost']
+                if ratio > best['exp_gain']/best['total_cost']:
+                    best = recipe
+            except:
+                continue
+        return best
+
+
+
+
 if __name__ == "__main__":
-    path = CraftPath("lime","Arcana","1","50")
+    path = CraftPath("lime","Arcana","2","200")
     #print("Raw return value:")
     #print(path.query_recipes())
     #print("Decoded value:")
     #print(str(path.decode_ingredients(path.query_recipes())))
-    print("Cost estimated:")
-    print(path.optimise_cost(path.decode_ingredients(path.query_recipes())))
+    #print("Cost estimated:")
+    #for cost in path.determine_cost(path.decode_ingredients(path.query_recipes())):
+    #    print(cost)
+    #    print('\n')
 
+    #print("Cost optimised:")
+    #for rec in path.optimise_cost(path.determine_cost(path.decode_ingredients(path.query_recipes()))):
+    #    print(rec)
+    #    print('\n')
+    print("Optimal crafting found:")
+    print(path.select_best(path.optimise_cost(path.determine_cost(path.decode_ingredients(path.query_recipes())))))
