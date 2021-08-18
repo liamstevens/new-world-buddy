@@ -90,29 +90,29 @@ class CraftPath:
         candidate_ingredients = []
         #Loop through the list of recipes and extract a mapping of ingredients with a total experience gain per recipe
         for e in recipes:
-            print(e)
             try:
                 num_ingredients = 0
                 exp_gain = 0
                 ing_list = []
-                print((base64.b64decode(e["ingredients"]["B"])).decode('utf-8').replace('\'','\"'))
+                #print((base64.b64decode(e["ingredients"]["B"])).decode('utf-8').replace('\'','\"'))
                 ingredients = json.loads((base64.b64decode(e["ingredients"]["B"])).decode('utf-8').replace('\'','\"'))
+                event = json.loads((base64.b64decode(e["event"]["B"])).decode('utf-8').replace('\'','\"'))
                 for e in ingredients:
                     num_ingredients += e["quantity"]
                     if e["type"] == "item":
                         ing_list.append({"quantity":e["quantity"], "choices": e["name"]})
                     elif e["type"] == "category":
-                        ing_list.append({"quantity":e["quantity"], "choices": [f["name"] for f in e["subingredients"]]})
-                if "CategoricalProgressionReward" in e["event"].keys():
-                    exp_gain += (e["event"]["CategoricalProgressionReward"]*num_ingredients)
+                        ing_list.append({"quantity":e["quantity"], "choices": [f["name"] for f in e["subIngredients"]]})
+                if "CategoricalProgressionReward" in event.keys():
+                    exp_gain += (event["CategoricalProgressionReward"]*num_ingredients)
                 candidate_ingredients.append({"name":e["name"], "ingredients":ing_list,"exp_gain": exp_gain} )
-                return candidate_ingredients
             except KeyError as e:
-                print(e)
+                print(f"Keyerror:{e}")
                 continue
             except Exception as e:
                 print(f"Unexpected error: {e}")
                 continue
+        return candidate_ingredients
 
     def traverse_recipes(self):
         #for e in self.get_recipes():
@@ -134,6 +134,7 @@ class CraftPath:
         recipe_cost = []
         for recipe in recipe_map:
             choice_cost = []
+            print(recipe)
             for ingredients in recipe["ingredients"]:
                 #TODO: Create DDB tables with weights - https:///projects/NWB/issues/NWB-1O actual weights to be added to dynamodb tables for each item.
                 #in the meantime manually weight stone, flint and wood tier as 1 and the rest as 2.
@@ -155,9 +156,11 @@ class CraftPath:
 
 
 if __name__ == "__main__":
-    path = CraftPath("lime","Arcana","0","50")
-    print("Raw return value:")
-    print(path.query_recipes())
-    print("Decoded value:")
-    print(str(path.decode_ingredients(path.query_recipes())))
+    path = CraftPath("lime","Arcana","1","50")
+    #print("Raw return value:")
+    #print(path.query_recipes())
+    #print("Decoded value:")
+    #print(str(path.decode_ingredients(path.query_recipes())))
+    print("Cost estimated:")
+    print(path.optimise_cost(path.decode_ingredients(path.query_recipes())))
 
