@@ -17,19 +17,23 @@ def load_json(file):
 
 def upload_recipe(json_obj):
     #json_obj = json.loads(json_obj)
-    payload = {
-            'tradeskill' : {"S": json_obj["tradeskill"]},
-            'recipelevel' : {"N": str(json_obj["recipeLevel"])},
-            'ingredients' : {"B": base64.b64encode(bytes(str(json_obj["ingredients"]),'utf-8'))},
-            'name' : {"S": json_obj["id"]}
-        }
-    response = client.put_item(
-        TableName='CraftingRecipes',
-        Item=payload
-    )
-    print(payload)
-    print(response)
-    return response
+    if "event" not in json_obj.keys():
+        return
+    else:
+        payload = {
+                'tradeskill' : {"S": json_obj["tradeskill"]},
+                'recipelevel' : {"N": str(json_obj["recipeLevel"])},
+                'ingredients' : {"B": base64.b64encode(bytes(str(json_obj["ingredients"]),'utf-8'))},
+                'name' : {"S": json_obj["id"]},
+                'event' : {"B": base64.b64encode(bytes(str(json_obj["event"]),'utf-8'))}
+            }
+        response = client.put_item(
+            TableName='CraftingRecipes',
+            Item=payload
+        )
+        print(payload)
+        print(response)
+        return response
 
 def upload_all_recipe(path):
     for e in os.listdir(path):
