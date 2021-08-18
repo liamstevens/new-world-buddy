@@ -112,6 +112,7 @@ class CraftPath:
                 continue
             except Exception as e:
                 print(f"Unexpected error: {e}")
+                continue
 
     def traverse_recipes(self):
         #for e in self.get_recipes():
