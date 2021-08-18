@@ -16,13 +16,17 @@ class CraftPath:
     _target_level = 0
     _recipes_to_make = []
     _ingredients_to_collect = []
+    _client = None
 
     def __init__(self,name, prof, start, finish):
-        _name = name
-        _profession = prof
-        _start_level = start
-        _target_level = finish
-        _client = boto3.Session(AWS_ACCESS_ID, AWS_ACCESS_KEY, region_name="ap-southeast-2").client("dynamodb")
+        self._name = name
+        self._profession = prof
+        self._start_level = start
+        self._target_level = finish
+        self._client = boto3.Session(AWS_ACCESS_ID, AWS_ACCESS_KEY, region_name="ap-southeast-2").client("dynamodb")
+       
+    def init_client(self):
+         self._client = boto3.Session(AWS_ACCESS_ID, AWS_ACCESS_KEY, region_name="ap-southeast-2").client("dynamodb")
 
     def get_profession(self):
         return self._profession
@@ -72,10 +76,11 @@ class CraftPath:
         client = self.get_client()
         recipes = client.query(
             TableName="CraftingRecipes",
-            KeyConditionExpression='tradeskill = :tradeskill AND recipelevel >= :recipelevel',
+            KeyConditionExpression='tradeskill = :tradeskill',
+            FilterExpression="recipelevel <= :recipelevel",
             ExpressionAttributeValues = {
                 ':tradeskill': {'S': self.get_profession()},
-                ':recipelevel' : {'N' : self.get_current()}
+                ':recipelevel' : {'N' : str(self.get_current())}
             }
         )
         return recipes['Items']
@@ -85,20 +90,28 @@ class CraftPath:
         candidate_ingredients = []
         #Loop through the list of recipes and extract a mapping of ingredients with a total experience gain per recipe
         for e in recipes:
-            num_ingredients = 0
-            exp_gain = 0
-            ing_list = []
-            ingredients = json.loads(base64.b64decode(e["ingredients"]))
-            for e in ingredients:
-                num_ingredients += e["quantity"]
-                if e["type"] == "item":
-                    ing_list.append({"quantity":e["quantity"], "choices": e["name"]})
-                elif e["type"] == "category":
-                    ing_list.append({"quantity":e["quantity"], "choices": [f["name"] for f in e["subingredients"]]})
-            if "CategoricalProgressionReward" in e["event"].keys():
-                exp_gain += (e["event"]["CategoricalProgressionReward"]*num_ingredients)
-            candidate_ingredients.append({"name":e["name"], "ingredients":ing_list,"exp_gain": exp_gain} )
-        return candidate_ingredients
+            print(e)
+            try:
+                num_ingredients = 0
+                exp_gain = 0
+                ing_list = []
+                print((base64.b64decode(e["ingredients"]["B"])).decode('utf-8').replace('\'','\"'))
+                ingredients = json.loads((base64.b64decode(e["ingredients"]["B"])).decode('utf-8').replace('\'','\"'))
+                for e in ingredients:
+                    num_ingredients += e["quantity"]
+                    if e["type"] == "item":
+                        ing_list.append({"quantity":e["quantity"], "choices": e["name"]})
+                    elif e["type"] == "category":
+                        ing_list.append({"quantity":e["quantity"], "choices": [f["name"] for f in e["subingredients"]]})
+                if "CategoricalProgressionReward" in e["event"].keys():
+                    exp_gain += (e["event"]["CategoricalProgressionReward"]*num_ingredients)
+                candidate_ingredients.append({"name":e["name"], "ingredients":ing_list,"exp_gain": exp_gain} )
+                return candidate_ingredients
+            except KeyError as e:
+                print(e)
+                continue
+            except Exception as e:
+                print(f"Unexpected error: {e}")
 
     def traverse_recipes(self):
         #for e in self.get_recipes():
@@ -140,8 +153,10 @@ class CraftPath:
         return recipe_cost
 
 
-
-
-
-
+if __name__ == "__main__":
+    path = CraftPath("lime","Arcana","0","50")
+    print("Raw return value:")
+    print(path.query_recipes())
+    print("Decoded value:")
+    print(str(path.decode_ingredients(path.query_recipes())))
 
