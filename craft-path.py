@@ -3,6 +3,7 @@ import boto3
 import os
 import base64
 import re
+import math
 
 
 AWS_ACCESS_ID = os.environ["AWS_ACCESS_ID"]
@@ -21,9 +22,9 @@ class CraftPath:
     def __init__(self,name, prof, start, finish):
         self._name = name
         self._profession = prof
-        self._start_level = start
+        self._start_level = int(start)
         self._current_level = self._start_level
-        self._target_level = finish
+        self._target_level = int(finish)
         self._client = boto3.Session(AWS_ACCESS_ID, AWS_ACCESS_KEY, region_name="ap-southeast-2").client("dynamodb")
        
     def init_client(self):
@@ -38,23 +39,50 @@ class CraftPath:
     def get_current(self):
         return self._current_level
 
+    def incr_current(self):
+        self._current_level += 1
+
     def get_target(self):
         return self._target_level
 
     def get_recipes(self):
         return self._recipes_to_make
 
-    def add_to_recipes(self,recipes):
-        for r in recipes:
-            self._recipes_to_make.append(r)
+    def add_to_recipes(self,recipe):
+        if len(self._recipes_to_make) == 0:
+            self._recipes_to_make.append(recipe)
+        else:
+            newrecipe=True
+            for r in self._recipes_to_make:
+                if r['name'] == recipe['name']:
+                    r['quantity']+=recipe['quantity']
+                    newrecipe=False
+            if newrecipe:
+                self._recipes_to_make.append(recipe)
         return self._recipes_to_make
 
     def get_ingredients(self):
         return self._ingredients_to_collect
 
     def add_to_ingredients(self, ingredients):
-        for i in ingredients:
-            self._ingredients_to_collect.append(i)
+        #print(f"submitted ingredients: {ingredients}")
+        if len(self._ingredients_to_collect) == 0:
+            self._ingredients_to_collect+=ingredients
+            #self.add_to_ingredients(ingredients[1:])
+        else:
+            for i in ingredients:
+                newitem=True
+                for j in self._ingredients_to_collect:
+                    #print(f"i:{i}, j:{j}")
+                    if i['item'] == j['item']:
+                        #input(f"adding quantity {i['quantity']} to item {i['item']}. Current ingredient list: {self._ingredients_to_collect}\n\n")
+                        j['quantity']+=i['quantity']
+                        newitem=False
+                        break
+                if newitem:
+                    #input(f"new ingredient:{i}. Current ingredient list: {self._ingredients_to_collect}\n\n")
+                    self._ingredients_to_collect.append(i)
+                #print(self._ingredients_to_collect)                 
         return self._ingredients_to_collect
 
     def get_client(self):
@@ -63,11 +91,11 @@ class CraftPath:
     def get_exp_to_next(self):
         #look up exp to next level
         with open('db_exp.json') as f:
-            contents = json.load(f)["crafting"][self.get_profession()]
+            contents = json.load(f)["crafting"][self.get_profession().lower()]
         cur = self.get_current()
         for e in contents:
-            if e["lvl"] == cur:
-                required_exp = e["xp"] #sets you at the very start of that level
+            if e['lvl'] == cur:
+                required_exp = e['xp'] #sets you at the very start of that level
                 break
         return required_exp
 
@@ -85,33 +113,6 @@ class CraftPath:
                 ':recipelevel' : {'N' : str(self.get_current())}
             }
         )
-        #print("Query results:")
-        #print(recipes)
-        #for rec in recipes["Items"]:
-         #   print(rec)
-        #print(recipes)
-        '''
-        items.append(recipes['Items'])
-        try:
-            lastkey = recipes['LastEvaluatedKey']
-            if 'LastEvaluatedKey' in recipes.keys():
-                while recipes['LastEvaluatedKey']:
-                    recipes = client.query(
-                    TableName="CraftingRecipes",
-                    KeyConditionExpression='tradeskill = :tradeskill',
-                    FilterExpression="recipelevel <= :recipelevel",
-                    ExpressionAttributeValues = {
-                        ':tradeskill': {'S': self.get_profession()},
-                        ':recipelevel' : {'N' : str(self.get_current())}
-                    },
-                    ExclusiveStartKey=lastkey
-                )
-                items.append(recipes['Items'])
-                if 'LastEvaluatedKey' not in recipes.keys():
-                    return items
-        except:
-            print("No Lastkey received")
-        #return items'''
         return recipes["Items"]
 
     def decode_ingredients(self,recipes):
@@ -245,11 +246,26 @@ class CraftPath:
                 continue
         return best
 
+    def traverse_levels(self):
+        while self.get_current() < self.get_target():
+            to_next = self.get_exp_to_next()
+            best = self.select_best(self.optimise_cost(self.determine_cost(self.decode_ingredients(self.query_recipes()))))
+            quantity = math.ceil(to_next/best['exp_gain'])
+            self.add_to_recipes({'name':best['name']['S'],'quantity':quantity})
+            #print(f"Best:{best}")
+            for i in best['ingredients']:
+                i['quantity']*=quantity
+                
+            #print(f"Quantity:{quantity}, ingredients:{best['ingredients']}")
+            self.add_to_ingredients(best['ingredients'])
+            self.incr_current()
+        return (self.get_recipes(), self.get_ingredients())
+
 
 
 
 if __name__ == "__main__":
-    path = CraftPath("lime","Arcana","2","200")
+    path = CraftPath("lime","Arcana","2","50")
     #print("Raw return value:")
     #print(path.query_recipes())
     #print("Decoded value:")
@@ -264,4 +280,5 @@ if __name__ == "__main__":
     #    print(rec)
     #    print('\n')
     print("Optimal crafting found:")
-    print(path.select_best(path.optimise_cost(path.determine_cost(path.decode_ingredients(path.query_recipes())))))
+    #print(path.select_best(path.optimise_cost(path.determine_cost(path.decode_ingredients(path.query_recipes())))))
+    print(path.traverse_levels())
