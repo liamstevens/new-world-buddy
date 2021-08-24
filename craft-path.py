@@ -65,24 +65,18 @@ class CraftPath:
         return self._ingredients_to_collect
 
     def add_to_ingredients(self, ingredients):
-        #print(f"submitted ingredients: {ingredients}")
         if len(self._ingredients_to_collect) == 0:
             self._ingredients_to_collect+=ingredients
-            #self.add_to_ingredients(ingredients[1:])
         else:
             for i in ingredients:
                 newitem=True
                 for j in self._ingredients_to_collect:
-                    #print(f"i:{i}, j:{j}")
                     if i['item'] == j['item']:
-                        #input(f"adding quantity {i['quantity']} to item {i['item']}. Current ingredient list: {self._ingredients_to_collect}\n\n")
                         j['quantity']+=i['quantity']
                         newitem=False
                         break
                 if newitem:
-                    #input(f"new ingredient:{i}. Current ingredient list: {self._ingredients_to_collect}\n\n")
-                    self._ingredients_to_collect.append(i)
-                #print(self._ingredients_to_collect)                 
+                    self._ingredients_to_collect.append(i)           
         return self._ingredients_to_collect
 
     def get_client(self):
@@ -124,7 +118,6 @@ class CraftPath:
                 num_ingredients = 0
                 exp_gain = 0
                 ing_list = []
-                #print((base64.b64decode(e["ingredients"]["B"])).decode('utf-8').replace('\'','\"'))
                 ingredients = json.loads((base64.b64decode(e["ingredients"]["B"])).decode('utf-8').replace('\'','\"'))
                 event = json.loads((base64.b64decode(e["event"]["B"])).decode('utf-8').replace('\'','\"'))
                 for ing in ingredients:
@@ -142,15 +135,9 @@ class CraftPath:
             except Exception as exc:
                 print(f"Unexpected error: {exc} - {e}")
                 continue
-        #print("Decoded results:")
-        #for rec in candidate_ingredients:
-        #    print(rec)
-        #print(candidate_ingredients)
+
         return candidate_ingredients
 
-    def traverse_recipes(self):
-        #for e in self.get_recipes():
-        return
     '''
     Cost definition:
         Cost = ((Tier+Rarity) * Quantity) * Scarcity
@@ -252,11 +239,8 @@ class CraftPath:
             best = self.select_best(self.optimise_cost(self.determine_cost(self.decode_ingredients(self.query_recipes()))))
             quantity = math.ceil(to_next/best['exp_gain'])
             self.add_to_recipes({'name':best['name']['S'],'quantity':quantity})
-            #print(f"Best:{best}")
             for i in best['ingredients']:
                 i['quantity']*=quantity
-                
-            #print(f"Quantity:{quantity}, ingredients:{best['ingredients']}")
             self.add_to_ingredients(best['ingredients'])
             self.incr_current()
         return (self.get_recipes(), self.get_ingredients())
@@ -266,19 +250,5 @@ class CraftPath:
 
 if __name__ == "__main__":
     path = CraftPath("lime","Arcana","2","50")
-    #print("Raw return value:")
-    #print(path.query_recipes())
-    #print("Decoded value:")
-    #print(str(path.decode_ingredients(path.query_recipes())))
-    #print("Cost estimated:")
-    #for cost in path.determine_cost(path.decode_ingredients(path.query_recipes())):
-    #    print(cost)
-    #    print('\n')
-
-    #print("Cost optimised:")
-    #for rec in path.optimise_cost(path.determine_cost(path.decode_ingredients(path.query_recipes()))):
-    #    print(rec)
-    #    print('\n')
     print("Optimal crafting found:")
-    #print(path.select_best(path.optimise_cost(path.determine_cost(path.decode_ingredients(path.query_recipes())))))
     print(path.traverse_levels())
