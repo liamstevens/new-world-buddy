@@ -1,34 +1,34 @@
 #DynamoDB
 
 resource "aws_dynamodb_table" "recipe_table" {
-    name = "CraftingRecipes"
-    billing_mode = "PROVISIONED"
-    read_capacity = 25
-    write_capacity = 25
-    hash_key = "tradeskill"
-    range_key = "name"
+  name           = "CraftingRecipes"
+  billing_mode   = "PROVISIONED"
+  read_capacity  = 25
+  write_capacity = 25
+  hash_key       = "tradeskill"
+  range_key      = "name"
 
-    attribute {
-      name = "tradeskill"
-      type = "S"
-    }
+  attribute {
+    name = "tradeskill"
+    type = "S"
+  }
 
-    /*attribute {
+  /*attribute {
       name = "recipelevel"
       type = "N"
     }*/
 
-    attribute {
-      name = "name"
-      type = "S"
-    }
-/*
+  attribute {
+    name = "name"
+    type = "S"
+  }
+  /*
     attribute {
       name = "ingredients"
       type = "B"
     }
 */
-    ttl {
+  ttl {
     attribute_name = "TimeToExist"
     enabled        = false
   }
