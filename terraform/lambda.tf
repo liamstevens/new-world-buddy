@@ -1,11 +1,11 @@
 resource "aws_s3_bucket" "lambda_storage" {
-  bucket = "barcode-lambda-bucket"
+  bucket        = "barcode-lambda-bucket"
   acl           = "private"
   force_destroy = true
 }
 
 data "archive_file" "lambda_crafting" {
-  type = "zip"
+  type        = "zip"
   source_dir  = "./lambda/crafting"
   output_path = "./lambda/crafting.zip"
 }
@@ -28,12 +28,13 @@ resource "aws_lambda_function" "crafting" {
   handler          = "craft-path.lambda_handler"
   source_code_hash = data.archive_file.lambda_crafting.output_base64sha256
   role             = aws_iam_role.lambda_exec.arn
+  timeout          = "30"
 }
 
 
 
 resource "aws_cloudwatch_log_group" "crafting" {
-  name = "/aws/lambda/${aws_lambda_function.crafting.function_name}"
+  name              = "/aws/lambda/${aws_lambda_function.crafting.function_name}"
   retention_in_days = 30
 }
 
