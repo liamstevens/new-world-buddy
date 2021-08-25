@@ -5,10 +5,6 @@ import base64
 import re
 import math
 
-
-AWS_ACCESS_ID = os.environ["AWS_ACCESS_ID"]
-AWS_ACCESS_KEY = os.environ["AWS_ACCESS_KEY"]
-
 class CraftPath:
     _name = ""
     _profession = ""
