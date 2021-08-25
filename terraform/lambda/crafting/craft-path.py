@@ -243,6 +243,7 @@ class CraftPath:
         return (self.get_recipes(), self.get_ingredients())
 
 def lambda_handler(event, context):
+    event = event["queryStringParameters"]
     path = CraftPath(event["name"],event["profession"],event["startlvl"],event["endlvl"])
     return {
         'message' : path.traverse_levels()
