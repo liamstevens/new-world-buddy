@@ -13,25 +13,11 @@ resource "aws_dynamodb_table" "recipe_table" {
     type = "S"
   }
 
-  /*attribute {
-      name = "recipelevel"
-      type = "N"
-    }*/
-
   attribute {
     name = "name"
     type = "S"
   }
-  /*
-    attribute {
-      name = "ingredients"
-      type = "B"
-    }
-*/
-  ttl {
-    attribute_name = "TimeToExist"
-    enabled        = false
-  }
+
   tags = {
     Name        = "CraftingRecipes"
     Environment = "production"

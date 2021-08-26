@@ -81,13 +81,21 @@ class CraftPath:
 
     def get_exp_to_next(self):
         #look up exp to next level
-        with open('db_exp.json') as f:
-            contents = json.load(f)["crafting"][self.get_profession().lower()]
-        cur = self.get_current()
-        for e in contents:
+        cur = self.get_current() 
+        client = self.get_client()
+        recipes = client.query(
+            TableName="CraftingRecipes",
+            KeyConditionExpression='tradeskill = :tradeskill',
+            FilterExpression="name = :name",
+            ExpressionAttributeValues = {
+                ':tradeskill': {'S': self.get_profession()},
+                ':name' : {'S' : "exp_map"}
+            }
+        )
+        for e in base64.b64decode(recipes["Items"]["value"])[self.get_profession()]:
             if e['lvl'] == cur:
                 required_exp = e['xp'] #sets you at the very start of that level
-                break
+                break  
         return required_exp
 
     def query_recipes(self):
