@@ -263,7 +263,8 @@ def lambda_handler(event, context):
     event = event["queryStringParameters"]
     path = CraftPath(event["name"],event["profession"],event["startlvl"],event["endlvl"])
     return {
-        'message' : path.traverse_levels()
+        'statusCode': 200,
+        'body' : str(path.traverse_levels())
     }
 
 
