@@ -113,6 +113,7 @@ class CraftPath:
                 ':recipelevel' : {'N' : str(self.get_current())}
             }
         )
+        print(recipes['Items'])
         return recipes["Items"]
 
     def decode_ingredients(self,recipes):
