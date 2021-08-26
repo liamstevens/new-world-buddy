@@ -220,6 +220,8 @@ class CraftPath:
     def select_best(self, optimised_recipes):
         best = {'total_cost':50,'exp_gain':0}
         for recipe in optimised_recipes:
+            if 'ingredients' not in recipe.keys():
+                continue
             #compute experience/cost
             try:
                 empty_ing = False
