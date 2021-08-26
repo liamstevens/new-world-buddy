@@ -262,9 +262,13 @@ class CraftPath:
 def lambda_handler(event, context):
     event = event["queryStringParameters"]
     path = CraftPath(event["name"],event["profession"],event["startlvl"],event["endlvl"])
+    (recipes, ingredients) = path.traverse_levels()
     return {
         'statusCode': 200,
-        'body' : str(path.traverse_levels())
+        'body' : json.dumps({
+            "recipes": recipes,
+            "ingredients": ingredients
+        })
     }
 
 

@@ -28,7 +28,7 @@ resource "aws_lambda_function" "crafting" {
   handler          = "craft-path.lambda_handler"
   source_code_hash = data.archive_file.lambda_crafting.output_base64sha256
   role             = aws_iam_role.lambda_exec.arn
-  timeout          = "60"
+  timeout          = "120"
 }
 
 
