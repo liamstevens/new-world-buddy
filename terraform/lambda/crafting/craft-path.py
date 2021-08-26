@@ -256,6 +256,7 @@ class CraftPath:
                 i['quantity']*=quantity
             self.add_to_ingredients(best['ingredients'])
             self.incr_current()
+        print((self.get_recipes(), self.get_ingredients()))
         return (self.get_recipes(), self.get_ingredients())
 
 def lambda_handler(event, context):
