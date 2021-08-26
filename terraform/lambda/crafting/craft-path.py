@@ -45,6 +45,9 @@ class CraftPath:
     def get_recipes(self):
         return self._recipes_to_make
 
+    def __str__(self):
+        return f"CraftPath object.\n Name:{self._name}. \nStartLevel:{self._start_level}. \nCurrentLevel:{self._current_level}. \nTargetLevel:{self._target_level}. \nProfession:{self._profession}.\n"
+
     def add_to_recipes(self,recipe):
         if len(self._recipes_to_make) == 0:
             self._recipes_to_make.append(recipe)
@@ -113,6 +116,7 @@ class CraftPath:
                 ':recipelevel' : {'N' : str(self.get_current())}
             }
         )
+        print(f"Self:{self}")
         print(recipes['Items'])
         return recipes["Items"]
 
