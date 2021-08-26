@@ -243,7 +243,11 @@ class CraftPath:
         while self.get_current() < self.get_target():
             to_next = self.get_exp_to_next()
             best = self.select_best(self.optimise_cost(self.determine_cost(self.decode_ingredients(self.query_recipes()))))
-            quantity = math.ceil(to_next/best['exp_gain'])
+            try:
+                quantity = math.ceil(to_next/best['exp_gain'])
+            except ZeroDivisionError:
+                print(f"Division by zero error. Best: {best}")
+                return
             self.add_to_recipes({'name':best['name']['S'],'quantity':quantity})
             for i in best['ingredients']:
                 i['quantity']*=quantity
