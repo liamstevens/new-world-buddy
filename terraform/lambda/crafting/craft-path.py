@@ -86,10 +86,10 @@ class CraftPath:
         recipes = client.query(
             TableName="CraftingRecipes",
             KeyConditionExpression='tradeskill = :tradeskill',
-            FilterExpression="name = :name",
+            FilterExpression="itemtype = :itemtype",
             ExpressionAttributeValues = {
                 ':tradeskill': {'S': self.get_profession()},
-                ':name' : {'S' : "exp_map"}
+                ':itemtype' : {'S' : "exp_map"}
             }
         )
         for e in base64.b64decode(recipes["Items"]["value"])[self.get_profession()]:
