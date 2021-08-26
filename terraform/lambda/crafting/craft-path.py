@@ -116,8 +116,6 @@ class CraftPath:
                 ':recipelevel' : {'N' : str(self.get_current())}
             }
         )
-        print(f"Self:{self}")
-        print(recipes['Items'])
         return recipes["Items"]
 
     def decode_ingredients(self,recipes):
@@ -141,10 +139,10 @@ class CraftPath:
                     exp_gain += (event["CategoricalProgressionReward"]*num_ingredients)
                 candidate_ingredients.append({"name":e["name"], "ingredients":ing_list,"exp_gain": exp_gain} )
             except KeyError as exc:
-                print(f"Keyerror:{exc} - {e['name']}")
+                
                 continue
             except Exception as exc:
-                print(f"Unexpected error: {exc} - {e}")
+               
                 continue
 
         return candidate_ingredients
@@ -191,8 +189,6 @@ class CraftPath:
                             else:
                                 choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*2})
                         except Exception as e:
-                            print(f"Unexpected exception: {e}")
-                            #print(f"Choice ({choice}) is likely a quest item, skip this recipe:{recipe['name']}.")
                             continue
                 recipe["weighted_ings"].append(choice_cost)            
             recipe_cost.append({"name": recipe["name"], "ingredients":recipe["weighted_ings"],"exp_gain": recipe["exp_gain"]})
@@ -264,7 +260,6 @@ class CraftPath:
 
 def lambda_handler(event, context):
     event = event["queryStringParameters"]
-    print(f"Query params: {event}")
     path = CraftPath(event["name"],event["profession"],event["startlvl"],event["endlvl"])
     return {
         'message' : path.traverse_levels()
