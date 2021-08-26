@@ -257,6 +257,7 @@ class CraftPath:
 
 def lambda_handler(event, context):
     event = event["queryStringParameters"]
+    print(f"Query params: {event}")
     path = CraftPath(event["name"],event["profession"],event["startlvl"],event["endlvl"])
     return {
         'message' : path.traverse_levels()
