@@ -248,8 +248,9 @@ class CraftPath:
 
     def traverse_levels(self):
         while self.get_current() < self.get_target():
-            to_next = self.get_exp_to_next()
             best = self.select_best(self.optimise_cost(self.determine_cost(self.decode_ingredients(self.query_recipes()))))
+            to_next = self.get_exp_to_next()
+            
             try:
                 quantity = math.ceil(to_next/best['exp_gain'])
             except ZeroDivisionError:
