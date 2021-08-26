@@ -92,7 +92,8 @@ class CraftPath:
                 ':itemtype' : {'S' : "exp_map"}
             }
         )
-        for e in base64.b64decode(recipes["Items"]["value"])[self.get_profession()]:
+        event = json.loads((base64.b64decode(recipes["Items"][0]["value"]['S']).decode('utf-8')))
+        for e in event[self.get_profession()]:
             if e['lvl'] == cur:
                 required_exp = e['xp'] #sets you at the very start of that level
                 break  
