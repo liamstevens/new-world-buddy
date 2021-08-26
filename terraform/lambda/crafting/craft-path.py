@@ -91,12 +91,12 @@ class CraftPath:
             KeyConditionExpression='tradeskill = :tradeskill',
             FilterExpression="itemtype = :itemtype",
             ExpressionAttributeValues = {
-                ':tradeskill': {'S': self.get_profession()},
+                ':tradeskill': {'S': self.get_profession().lower()},
                 ':itemtype' : {'S' : "exp_map"}
             }
         )
         event = json.loads((base64.b64decode(recipes["Items"][0]["value"]['S']).decode('utf-8')))
-        for e in event[self.get_profession()]:
+        for e in event[self.get_profession().lower()]:
             if e['lvl'] == cur:
                 required_exp = e['xp'] #sets you at the very start of that level
                 break  
@@ -250,7 +250,6 @@ class CraftPath:
         while self.get_current() < self.get_target():
             best = self.select_best(self.optimise_cost(self.determine_cost(self.decode_ingredients(self.query_recipes()))))
             to_next = self.get_exp_to_next()
-            
             try:
                 quantity = math.ceil(to_next/best['exp_gain'])
             except ZeroDivisionError:
