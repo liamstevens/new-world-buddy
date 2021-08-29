@@ -21,6 +21,8 @@ class CraftPath:
         self._start_level = int(start)
         self._current_level = self._start_level
         self._target_level = int(finish)
+        self._recipes_to_make = []
+        self._ingredients_to_collect = []
         self._client = boto3.client("dynamodb")
        
     def init_client(self):
