@@ -25,7 +25,7 @@ resource "aws_lambda_function" "crafting" {
   s3_bucket        = aws_s3_bucket.lambda_storage.id
   s3_key           = aws_s3_bucket_object.lambda_crafting.key
   runtime          = "python3.7"
-  handler          = "craft-path.CraftPath.handler"
+  handler          = "craft-path.handler"
   source_code_hash = data.archive_file.lambda_crafting.output_base64sha256
   role             = aws_iam_role.lambda_exec.arn
   timeout          = "120"
