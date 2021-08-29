@@ -31,9 +31,10 @@ resource "aws_apigatewayv2_stage" "lambda" {
 resource "aws_apigatewayv2_integration" "crafting" {
   api_id = aws_apigatewayv2_api.lambda.id
 
-  integration_uri    = aws_lambda_function.crafting.invoke_arn
-  integration_type   = "AWS_PROXY"
-  integration_method = "POST"
+  integration_uri      = aws_lambda_function.crafting.invoke_arn
+  integration_type     = "AWS_PROXY"
+  integration_method   = "POST"
+  timeout_milliseconds = 120000
 }
 
 resource "aws_apigatewayv2_route" "crafting" {
