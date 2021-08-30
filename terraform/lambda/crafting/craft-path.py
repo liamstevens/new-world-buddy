@@ -139,7 +139,7 @@ class CraftPath:
                         ing_list.append({"quantity":ing["quantity"], "choices": [f for f in ing["subIngredients"]]})
                 if "CategoricalProgressionReward" in event.keys():
                     exp_gain += (event["CategoricalProgressionReward"]*num_ingredients)
-                if "itemName" in e.keys() and len(e['itemName'] > 0):
+                if "itemName" in e.keys():
                     candidate_ingredients.append({"name":e["itemName"], "ingredients":ing_list,"exp_gain": exp_gain} )
                 else:
                     candidate_ingredients.append({"name":e["name"], "ingredients":ing_list,"exp_gain": exp_gain} )
@@ -150,7 +150,6 @@ class CraftPath:
             except Exception as exc:
                
                 continue
-
         return candidate_ingredients
 
     '''
@@ -262,7 +261,6 @@ class CraftPath:
                 i['quantity']*=quantity
             self.add_to_ingredients(best['ingredients'])
             self.incr_current()
-        print((self.get_recipes(), self.get_ingredients()))
         return (self.get_recipes(), self.get_ingredients())
 
 def lambda_handler(event, context):
