@@ -27,6 +27,7 @@ def upload_recipe(json_obj):
             'recipelevel' : {"N": str(json_obj["recipeLevel"])},
             'ingredients' : {"B": base64.b64encode(bytes(str(json_obj["ingredients"]),'utf-8'))},
             'name' : {"S": json_obj["id"]},
+            'itemName' : {"S": json_obj['output']['name']},
             'event' : {"B": base64.b64encode(bytes(str(json_obj["event"]),'utf-8'))}
         }
     response = client.put_item(
