@@ -1,6 +1,7 @@
 import discord
 import os
 import requests
+import json
 
 from discord.ext import commands
 
@@ -16,7 +17,30 @@ async def get_crafting(ctx, profession: str, start_level: int, finish_level: int
     payload = {'profession': profession.capitalize(), 'startlvl':start_level, 'endlvl':finish_level,'name':ctx.author}
     #get JSON object of recipes to craft.
     r = requests.get(ENDPOINT,params=payload)
-    await ctx.send(r.text)
+    rdict = json.loads(r.text)
+    recipes=""
+    recipeq=""
+    ingr=""
+    ingrq=""
+    for item in rdict["recipes"]:
+        recipes+=f'{item["name"]}\n'
+        recipeq+=f'{item["quantity"]}\n'
+    
+    for item in rdict['ingredients']:
+        ingr+=f'{item["item"]}\n'
+        ingrq+=f'{item["quantity"]}\n'
+    embeddedTable = discord.Embed(title="Recipe Information")
+    embeddedTable.add_field(name = "Recipe", value = recipes, inline=True)
+    embeddedTable.add_field(name = "Quantity", value = recipeq, inline=True)
+    
+    await ctx.send(embed=embeddedTable)
+    embeddedTable = discord.Embed(title="Ingredient Information")
+    embeddedTable.add_field(name = "Ingredient", value = ingr, inline=True)
+    embeddedTable.add_field(name = "Quantity", value = ingrq, inline=True)
+    
+    await ctx.send(embed=embeddedTable)
+
+    
 
 
 
