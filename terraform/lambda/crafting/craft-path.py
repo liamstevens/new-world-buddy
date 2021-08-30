@@ -139,7 +139,7 @@ class CraftPath:
                         ing_list.append({"quantity":ing["quantity"], "choices": [f for f in ing["subIngredients"]]})
                 if "CategoricalProgressionReward" in event.keys():
                     exp_gain += (event["CategoricalProgressionReward"]*num_ingredients)
-                candidate_ingredients.append({"name":e["name"], "ingredients":ing_list,"exp_gain": exp_gain} )
+                candidate_ingredients.append({"name":e["itemName"], "ingredients":ing_list,"exp_gain": exp_gain} )
             except KeyError as exc:
                 
                 continue
