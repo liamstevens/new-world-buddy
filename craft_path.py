@@ -5,10 +5,6 @@ import base64
 import re
 import math
 
-
-AWS_ACCESS_ID = os.environ["AWS_ACCESS_ID"]
-AWS_ACCESS_KEY = os.environ["AWS_ACCESS_KEY"]
-
 class CraftPath:
     _name = ""
     _profession = ""
@@ -25,10 +21,13 @@ class CraftPath:
         self._start_level = int(start)
         self._current_level = self._start_level
         self._target_level = int(finish)
-        self._client = boto3.Session(AWS_ACCESS_ID, AWS_ACCESS_KEY, region_name="ap-southeast-2").client("dynamodb")
+        self._recipes_to_make = []
+        self._ingredients_to_collect = []
+        self._client = boto3.client("dynamodb")
        
     def init_client(self):
-         self._client = boto3.Session(AWS_ACCESS_ID, AWS_ACCESS_KEY, region_name="ap-southeast-2").client("dynamodb")
+        #init client using inbuild lambda credentials
+        self._client = boto3.client("dynamodb")
 
     def get_profession(self):
         return self._profession
@@ -47,6 +46,9 @@ class CraftPath:
 
     def get_recipes(self):
         return self._recipes_to_make
+
+    def __str__(self):
+        return f"CraftPath object.\n Name:{self._name}. \nStartLevel:{self._start_level}. \nCurrentLevel:{self._current_level}. \nTargetLevel:{self._target_level}. \nProfession:{self._profession}.\n"
 
     def add_to_recipes(self,recipe):
         if len(self._recipes_to_make) == 0:
@@ -84,13 +86,23 @@ class CraftPath:
 
     def get_exp_to_next(self):
         #look up exp to next level
-        with open('db_exp.json') as f:
-            contents = json.load(f)["crafting"][self.get_profession().lower()]
-        cur = self.get_current()
-        for e in contents:
+        cur = self.get_current() 
+        client = self.get_client()
+        recipes = client.query(
+            TableName="CraftingRecipes",
+            KeyConditionExpression='tradeskill = :tradeskill',
+            FilterExpression="itemtype = :itemtype",
+            ExpressionAttributeValues = {
+                ':tradeskill': {'S': self.get_profession().capitalize()},
+                ':itemtype' : {'S' : "exp_map"}
+            }
+        )
+        event = json.loads((base64.b64decode(recipes["Items"][0]["value"]['S']).decode('utf-8')))
+        
+        for e in event:
             if e['lvl'] == cur:
                 required_exp = e['xp'] #sets you at the very start of that level
-                break
+                break  
         return required_exp
 
     def query_recipes(self):
@@ -122,20 +134,23 @@ class CraftPath:
                 event = json.loads((base64.b64decode(e["event"]["B"])).decode('utf-8').replace('\'','\"'))
                 for ing in ingredients:
                     num_ingredients += ing["quantity"]
-                    if ing["type"] == "item":
+                    if ing["type"] == "item" or ing["type"] == "resource":
                         ing_list.append({"quantity":ing["quantity"], "choices": ing["name"]})
                     elif ing["type"] == "category":
                         ing_list.append({"quantity":ing["quantity"], "choices": [f for f in ing["subIngredients"]]})
                 if "CategoricalProgressionReward" in event.keys():
                     exp_gain += (event["CategoricalProgressionReward"]*num_ingredients)
-                candidate_ingredients.append({"name":e["name"], "ingredients":ing_list,"exp_gain": exp_gain} )
+                if "itemName" in e.keys():
+                    candidate_ingredients.append({"name":e["itemName"], "ingredients":ing_list,"exp_gain": exp_gain} )
+                else:
+                    candidate_ingredients.append({"name":e["name"], "ingredients":ing_list,"exp_gain": exp_gain} )
+
             except KeyError as exc:
-                print(f"Keyerror:{exc} - {e['name']}")
+                
                 continue
             except Exception as exc:
-                print(f"Unexpected error: {exc} - {e}")
+               
                 continue
-
         return candidate_ingredients
 
     '''
@@ -165,23 +180,22 @@ class CraftPath:
                 #TODO add tiebreakers based on item weight
                 for choice in choices:
                     if type(choices) == str:
-                        if any(res in choices.lower() for res in ["stone", "flint", "wood", "water"]):
+                        if any(res in choices.lower() for res in ["stone", "flint", "timber", "water", "leather", "oil"]):
                             if "mote" not in choices.lower():
                                 choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*1})
                                 
                         else:
                             #Choice is likely a quest item or raw material, skip this recipe.
+                            choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*3})
                             break
                     else:
                         try:
                             choice["tier"] = int(re.search(tier_re,choice["id"]).group(0)[-1])
-                            if any(res in choice["name"].lower() for res in ["stone", "flint", "wood", "water"]):
+                            if any(res in choice["name"].lower() for res in ["stone", "flint", "timber", "water", "leather", "oil"]):
                                 choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*1})
                             else:
                                 choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*2})
                         except Exception as e:
-                            print(f"Unexpected exception: {e}")
-                            #print(f"Choice ({choice}) is likely a quest item, skip this recipe:{recipe['name']}.")
                             continue
                 recipe["weighted_ings"].append(choice_cost)            
             recipe_cost.append({"name": recipe["name"], "ingredients":recipe["weighted_ings"],"exp_gain": recipe["exp_gain"]})
@@ -214,6 +228,8 @@ class CraftPath:
     def select_best(self, optimised_recipes):
         best = {'total_cost':50,'exp_gain':0}
         for recipe in optimised_recipes:
+            if 'ingredients' not in recipe.keys():
+                continue
             #compute experience/cost
             try:
                 empty_ing = False
@@ -231,13 +247,18 @@ class CraftPath:
                     best = recipe
             except:
                 continue
+        print(f"Best recipe for {self._profession} at {self._current_level}: {best}")
         return best
 
     def traverse_levels(self):
         while self.get_current() < self.get_target():
-            to_next = self.get_exp_to_next()
             best = self.select_best(self.optimise_cost(self.determine_cost(self.decode_ingredients(self.query_recipes()))))
-            quantity = math.ceil(to_next/best['exp_gain'])
+            to_next = self.get_exp_to_next()
+            try:
+                quantity = math.ceil(to_next/best['exp_gain'])
+            except ZeroDivisionError:
+                print(f"Division by zero error. Best: {best}")
+                return
             self.add_to_recipes({'name':best['name']['S'],'quantity':quantity})
             for i in best['ingredients']:
                 i['quantity']*=quantity
@@ -246,13 +267,19 @@ class CraftPath:
         return (self.get_recipes(), self.get_ingredients())
 
 def lambda_handler(event, context):
+    event = event["queryStringParameters"]
     path = CraftPath(event["name"],event["profession"],event["startlvl"],event["endlvl"])
+    (recipes, ingredients) = path.traverse_levels()
     return {
-        'message' : path.traverse_levels()
+        'statusCode': 200,
+        'body' : json.dumps({
+            "recipes": recipes,
+            "ingredients": ingredients
+        })
     }
 
 
 if __name__ == "__main__":
-    path = CraftPath("lime","Arcana","2","50")
+    path = CraftPath("lime","Weaponsmithing","2","50")
     print("Optimal crafting found:")
     print(path.traverse_levels())

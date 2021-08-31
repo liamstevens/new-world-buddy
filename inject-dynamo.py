@@ -20,6 +20,8 @@ def upload_recipe(json_obj):
     try:
         if "event" not in json_obj.keys():
             return
+        elif json_obj["category"] == "Work Orders":
+            return
     except Exception as e:
         return
     payload = {

@@ -93,12 +93,13 @@ class CraftPath:
             KeyConditionExpression='tradeskill = :tradeskill',
             FilterExpression="itemtype = :itemtype",
             ExpressionAttributeValues = {
-                ':tradeskill': {'S': self.get_profession().lower()},
+                ':tradeskill': {'S': self.get_profession().capitalize()},
                 ':itemtype' : {'S' : "exp_map"}
             }
         )
         event = json.loads((base64.b64decode(recipes["Items"][0]["value"]['S']).decode('utf-8')))
-        for e in event[self.get_profession().lower()]:
+        
+        for e in event:
             if e['lvl'] == cur:
                 required_exp = e['xp'] #sets you at the very start of that level
                 break  
@@ -133,7 +134,7 @@ class CraftPath:
                 event = json.loads((base64.b64decode(e["event"]["B"])).decode('utf-8').replace('\'','\"'))
                 for ing in ingredients:
                     num_ingredients += ing["quantity"]
-                    if ing["type"] == "item":
+                    if ing["type"] == "item" or ing["type"] == "resource":
                         ing_list.append({"quantity":ing["quantity"], "choices": ing["name"]})
                     elif ing["type"] == "category":
                         ing_list.append({"quantity":ing["quantity"], "choices": [f for f in ing["subIngredients"]]})
@@ -179,17 +180,18 @@ class CraftPath:
                 #TODO add tiebreakers based on item weight
                 for choice in choices:
                     if type(choices) == str:
-                        if any(res in choices.lower() for res in ["stone", "flint", "wood", "water"]):
+                        if any(res in choices.lower() for res in ["stone", "flint", "timber", "water", "leather", "oil"]):
                             if "mote" not in choices.lower():
                                 choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*1})
                                 
                         else:
                             #Choice is likely a quest item or raw material, skip this recipe.
+                            choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*3})
                             break
                     else:
                         try:
                             choice["tier"] = int(re.search(tier_re,choice["id"]).group(0)[-1])
-                            if any(res in choice["name"].lower() for res in ["stone", "flint", "wood", "water"]):
+                            if any(res in choice["name"].lower() for res in ["stone", "flint", "timber", "water", "leather", "oil"]):
                                 choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*1})
                             else:
                                 choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*2})
@@ -245,6 +247,7 @@ class CraftPath:
                     best = recipe
             except:
                 continue
+        print(f"Best recipe for {self._profession} at {self._current_level}: {best}")
         return best
 
     def traverse_levels(self):
@@ -277,6 +280,6 @@ def lambda_handler(event, context):
 
 
 if __name__ == "__main__":
-    path = CraftPath("lime","Arcana","2","50")
+    path = CraftPath("lime","Weaponsmithing","2","50")
     print("Optimal crafting found:")
     print(path.traverse_levels())
