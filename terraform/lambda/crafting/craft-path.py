@@ -172,8 +172,9 @@ class CraftPath:
             recipe["weighted_ings"] = []
 
             #discard faction specific recipes
-            if any(res in recipe["output"]["name"].lower() for res in ["covenant", "syndicate", "marauder"]):
-                continue
+            #if any(res in recipe["output"]["name"].lower() for res in ["covenant", "syndicate", "marauder"]):
+            #    
+            #    continue
 
             for ing in recipe["ingredients"]:
                 choice_cost = []
@@ -201,7 +202,7 @@ class CraftPath:
                             choice["tier"] = int(re.search(tier_re,choice["id"]).group(0)[-1])
                             if any(res in choice["name"].lower() for res in ["stone", "flint", "timber", "water", "leather", "oil", "ingot"]):
                                 choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*1})
-                            elif "seal" in choice.lower():
+                            elif "seal" in choice["name"].lower():
                                 choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*1000})
                             else:
                                 choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*2})
