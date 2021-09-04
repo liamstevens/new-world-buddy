@@ -172,9 +172,9 @@ class CraftPath:
             recipe["weighted_ings"] = []
 
             #discard faction specific recipes
-            #if any(res in recipe["output"]["name"].lower() for res in ["covenant", "syndicate", "marauder"]):
-            #    
-            #    continue
+            if any(res in recipe["output"]["name"].lower() for res in ["covenant", "syndicate", "marauder"]):
+                print(f"Factional attribute found in recipe. Recipe: {recipe["output"]["name"]}")
+                continue
 
             for ing in recipe["ingredients"]:
                 choice_cost = []
