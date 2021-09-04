@@ -171,12 +171,6 @@ class CraftPath:
         for recipe in recipe_map:
             recipe["weighted_ings"] = []
 
-            #discard faction specific recipes
-            if any(res in recipe["name"]["S"].lower() for res in ["covenant", "syndicate", "marauder"]):
-                name = recipe["name"]["S"]
-                print(f"Factional attribute found in recipe. Recipe: {name}")
-                continue
-
             for ing in recipe["ingredients"]:
                 choice_cost = []
                 #TODO: Create DDB tables with weights - https:///projects/NWB/issues/NWB-1O actual weights to be added to dynamodb tables for each item.
@@ -214,6 +208,11 @@ class CraftPath:
         for rec in recipe_cost:
             if len(rec["ingredients"]) < 1 or any(not ing for ing in rec["ingredients"]):
                 recipe_cost.remove(rec)
+            elif any(res in rec["name"]["S"].lower() for res in ["covenant", "syndicate", "marauder"]):
+                name = recipe["name"]["S"]
+                print(f"Factional attribute found in recipe. Recipe: {name}")
+                recipe_cost.remove(rec)
+
         print(recipe_cost)
         return recipe_cost
 
