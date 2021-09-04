@@ -171,6 +171,10 @@ class CraftPath:
         for recipe in recipe_map:
             recipe["weighted_ings"] = []
 
+            #discard faction specific recipes
+            if any(res in recipe["output"]["name"].lower() for res in ["covenant", "syndicate", "marauder"]):
+                continue
+
             for ing in recipe["ingredients"]:
                 choice_cost = []
                 #TODO: Create DDB tables with weights - https:///projects/NWB/issues/NWB-1O actual weights to be added to dynamodb tables for each item.
