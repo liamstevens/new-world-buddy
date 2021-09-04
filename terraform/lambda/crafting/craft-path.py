@@ -186,13 +186,19 @@ class CraftPath:
                                 
                         else:
                             #Choice is likely a quest item or raw material, skip this recipe.
-                            choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*3})
+                            #If material is a seal from faction vendors, weight it very highly to avoid selection
+                            if "seal" in choices.lower():
+                                choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*1000})
+                            else:
+                                choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*3})
                             break
                     else:
                         try:
                             choice["tier"] = int(re.search(tier_re,choice["id"]).group(0)[-1])
                             if any(res in choice["name"].lower() for res in ["stone", "flint", "timber", "water", "leather", "oil", "ingot"]):
                                 choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*1})
+                            elif "seal" in choice.lower():
+                                choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*1000})
                             else:
                                 choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*2})
                         except Exception as e:
