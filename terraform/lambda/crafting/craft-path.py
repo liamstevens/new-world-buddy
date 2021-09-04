@@ -214,6 +214,7 @@ class CraftPath:
         for rec in recipe_cost:
             if len(rec["ingredients"]) < 1 or any(not ing for ing in rec["ingredients"]):
                 recipe_cost.remove(rec)
+        print(recipe_cost)
         return recipe_cost
 
 
