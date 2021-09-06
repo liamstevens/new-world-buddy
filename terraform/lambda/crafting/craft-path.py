@@ -214,9 +214,9 @@ class CraftPath:
                                 if "stone" in choice.lower() and len(choice) > 5:
                                     choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*6})
                                 elif "mote" not in choice.lower():
-                                    choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*6})
-                                else:
                                     choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*1})
+                                else:
+                                    choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*6})
                             elif "seal" in choice["name"].lower():
                                 choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*1000})
                             else:
