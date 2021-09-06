@@ -198,6 +198,8 @@ class CraftPath:
                                 break
                             if "mote" not in choices.lower():
                                 choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*1})
+                            else:
+                                choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*6})
                                 
                         else:
                             #Choice is likely a quest item or raw material, skip this recipe.
