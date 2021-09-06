@@ -108,8 +108,8 @@ class CraftPath:
     def query_recipes(self):
         #perform lookup for all recipes currently available
         #Returns array of serialised recipe DDB entries
-        #items = []
         client = self.get_client()
+        output = []
         recipes = client.query(
             TableName="CraftingRecipes",
             KeyConditionExpression='tradeskill = :tradeskill',
@@ -119,7 +119,20 @@ class CraftPath:
                 ':recipelevel' : {'N' : str(self.get_current())}
             }
         )
-        return recipes["Items"]
+        output+=recipes["Items"]
+        while "LastEvaluatedKey" in recipes.keys():
+            recipes = client.query(
+                TableName="CraftingRecipes",
+                KeyConditionExpression='tradeskill = :tradeskill',
+                FilterExpression="recipelevel <= :recipelevel",
+                ExpressionAttributeValues = {
+                    ':tradeskill': {'S': self.get_profession()},
+                    ':recipelevel' : {'N' : str(self.get_current())}
+                },
+                ExclusiveStartKey=recipes["LastEvaluatedKey"]
+            )
+            output+=recipes["Items"]
+        return output
 
     def decode_ingredients(self,recipes):
         #ingredients list

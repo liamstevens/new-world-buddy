@@ -30,7 +30,7 @@ class CraftPath:
         self._client = boto3.client("dynamodb")
 
     def get_profession(self):
-        return self._profession
+        return self._profession.capitalize()
 
     def get_start(self):
         return self._start_level
@@ -108,8 +108,8 @@ class CraftPath:
     def query_recipes(self):
         #perform lookup for all recipes currently available
         #Returns array of serialised recipe DDB entries
-        #items = []
         client = self.get_client()
+        output = []
         recipes = client.query(
             TableName="CraftingRecipes",
             KeyConditionExpression='tradeskill = :tradeskill',
@@ -119,7 +119,20 @@ class CraftPath:
                 ':recipelevel' : {'N' : str(self.get_current())}
             }
         )
-        return recipes["Items"]
+        output+=recipes["Items"]
+        while "LastEvaluatedKey" in recipes.keys():
+            recipes = client.query(
+                TableName="CraftingRecipes",
+                KeyConditionExpression='tradeskill = :tradeskill',
+                FilterExpression="recipelevel <= :recipelevel",
+                ExpressionAttributeValues = {
+                    ':tradeskill': {'S': self.get_profession()},
+                    ':recipelevel' : {'N' : str(self.get_current())}
+                },
+                ExclusiveStartKey=recipes["LastEvaluatedKey"]
+            )
+            output+=recipes["Items"]
+        return output
 
     def decode_ingredients(self,recipes):
         #ingredients list
@@ -280,6 +293,7 @@ def lambda_handler(event, context):
 
 
 if __name__ == "__main__":
-    path = CraftPath("lime","Weaponsmithing","2","50")
-    print("Optimal crafting found:")
+    path = CraftPath("lime","Armoring","5","100")
+    #print(path.query_recipes())
+    #print("Optimal crafting found:")
     print(path.traverse_levels())

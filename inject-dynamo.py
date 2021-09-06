@@ -22,6 +22,8 @@ def upload_recipe(json_obj):
             return
         elif json_obj["category"] == "Work Orders":
             return
+        elif any(res in json_obj["output"]["name"].lower() for res in ["covenant", "syndicate", "marauder"]):
+            return
     except Exception as e:
         return
     payload = {
@@ -42,7 +44,7 @@ def upload_recipe(json_obj):
 
 def upload_all_recipe(path):
     for e in os.listdir(path):
-        time.sleep(0.05)
+        time.sleep(0.10)
         if e.endswith(".json"):
             print(e)
             try:
@@ -55,4 +57,5 @@ def upload_all_recipe(path):
 if __name__ == "__main__":
     #print(load_json("./nwdb.info/db/recipe/Woodworker_ClothWeaveT3.json"))
     #upload_recipe(load_json("./nwdb.info/db/recipe/Woodworker_ClothWeaveT3.json"))
+    #upload_all_recipe('/Users/ljs/Projects/new-world-buddy/nwdb.info/db/recipe/json')
     upload_all_recipe('/Users/ljs/Projects/new-world-buddy/nwdb.info/db/recipe/json')
