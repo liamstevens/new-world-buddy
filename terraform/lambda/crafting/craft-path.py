@@ -205,17 +205,22 @@ class CraftPath:
                             if "seal" in choices.lower():
                                 choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*1000})
                             else:
-                                choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*4})
+                                choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*6})
                             break
                     else:
                         try:
                             choice["tier"] = int(re.search(tier_re,choice["id"]).group(0)[-1])
                             if any(res in choice["name"].lower() for res in ["stone", "flint", "timber", "water", "leather", "oil", "ingot"]):
-                                choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*1})
+                                if "stone" in choice.lower() and len(choice) > 5:
+                                    choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*6})
+                                elif "mote" not in choice.lower():
+                                    choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*6})
+                                else:
+                                    choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*1})
                             elif "seal" in choice["name"].lower():
                                 choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*1000})
                             else:
-                                choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*4})
+                                choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*6})
                         except Exception as e:
                             continue
                 recipe["weighted_ings"].append(choice_cost)            
