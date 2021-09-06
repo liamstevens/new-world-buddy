@@ -194,6 +194,8 @@ class CraftPath:
                 for choice in choices:
                     if type(choices) == str:
                         if any(res in choices.lower() for res in ["stone", "flint", "timber", "water", "leather", "oil", "ingot"]):
+                            if "stone" in choices.lower() and len(choices) > 5:
+                                break
                             if "mote" not in choices.lower():
                                 choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*1})
                                 
