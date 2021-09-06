@@ -205,7 +205,7 @@ class CraftPath:
                             if "seal" in choices.lower():
                                 choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*1000})
                             else:
-                                choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*3})
+                                choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*4})
                             break
                     else:
                         try:
@@ -215,7 +215,7 @@ class CraftPath:
                             elif "seal" in choice["name"].lower():
                                 choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*1000})
                             else:
-                                choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*2})
+                                choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*4})
                         except Exception as e:
                             continue
                 recipe["weighted_ings"].append(choice_cost)            
