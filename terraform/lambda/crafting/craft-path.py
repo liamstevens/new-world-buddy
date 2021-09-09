@@ -193,7 +193,7 @@ class CraftPath:
                 #TODO add tiebreakers based on item weight
                 for choice in choices:
                     if type(choices) == str:
-                        if any(res in choices.lower() for res in ["stone", "flint", "timber", "water", "leather", "oil", "ingot"]):
+                        if any(res in choices.lower() for res in ["stone", "flint", "timber", "water", "leather", "oil", " ingot","lumber"]):
                             if "stone" in choices.lower() and len(choices) > 5:
                                 break
                             if "mote" not in choices.lower():
@@ -212,7 +212,7 @@ class CraftPath:
                     else:
                         try:
                             choice["tier"] = int(re.search(tier_re,choice["id"]).group(0)[-1])
-                            if any(res in choice["name"].lower() for res in ["stone", "flint", "timber", "water", "leather", "oil", "ingot"]):
+                            if any(res in choice["name"].lower() for res in ["stone", "flint", "timber", "water", "leather", "oil", " ingot","lumber"]):
                                 if "stone" in choice.lower() and len(choice) > 5:
                                     choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*6})
                                 elif "mote" not in choice.lower():
