@@ -246,6 +246,7 @@ class CraftPath:
             o['name'] = rec['name']
             o['ingredients'] = []
             o['exp_gain'] = rec['exp_gain']
+            o['itemID'] = rec['itemID']
             for items in rec['ingredients']:
                 try:
                     mincost = items[0]
