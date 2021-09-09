@@ -154,9 +154,9 @@ class CraftPath:
                 if "CategoricalProgressionReward" in event.keys():
                     exp_gain += (event["CategoricalProgressionReward"]*num_ingredients)
                 if "itemName" in e.keys():
-                    candidate_ingredients.append({"name":e["itemName"], "ingredients":ing_list,"exp_gain": exp_gain} )
+                    candidate_ingredients.append({"name":e["itemName"], "ingredients":ing_list,"exp_gain": exp_gain, "itemID": e["name"]} )
                 else:
-                    candidate_ingredients.append({"name":e["name"], "ingredients":ing_list,"exp_gain": exp_gain} )
+                    candidate_ingredients.append({"name":e["name"], "ingredients":ing_list,"exp_gain": exp_gain, "itemID": e["name"]} )
 
             except KeyError as exc:
                 
