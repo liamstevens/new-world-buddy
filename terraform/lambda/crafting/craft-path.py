@@ -194,13 +194,13 @@ class CraftPath:
                 for choice in choices:
                     if type(choices) == str:
                         if any(res in choices.lower() for res in ["stone", "flint", "timber", "water", "leather", "oil", " ingot","lumber"]):
+                            #print(choices)
                             if "stone" in choices.lower() and len(choices) > 5:
                                 break
                             if "mote" not in choices.lower():
                                 choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*1})
                             else:
-                                choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*6})
-                                
+                                choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((10)*ing["quantity"])*6})     
                         else:
                             #Choice is likely a quest item or raw material, skip this recipe.
                             #If material is a seal from faction vendors, weight it very highly to avoid selection
@@ -213,17 +213,19 @@ class CraftPath:
                         try:
                             choice["tier"] = int(re.search(tier_re,choice["id"]).group(0)[-1])
                             if any(res in choice["name"].lower() for res in ["stone", "flint", "timber", "water", "leather", "oil", " ingot","lumber"]):
-                                if "stone" in choice.lower() and len(choice) > 5:
-                                    choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*6})
-                                elif "mote" not in choice.lower():
-                                    choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*1})
+                                if "stone" in choice["name"].lower() and len(choice) > 5:
+                                    choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":(((choice["tier"]*5)+choice["rarity"]*10)*choice["quantity"])*6})
+                                elif "mote" not in choice["name"].lower():
+                                    choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((1+1)*choice["quantity"])*1})
+                                    #break #take the cheapest option
                                 else:
-                                    choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*6})
+                                    choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":(((choice["tier"]*5)+choice["rarity"]*10)*choice["quantity"])*6})
                             elif "seal" in choice["name"].lower():
-                                choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*1000})
+                                choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":(((choice["tier"]*2)+choice["rarity"]*10)*choice["quantity"])*1000})
                             else:
-                                choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((choice["tier"]+choice["rarity"])*choice["quantity"])*6})
+                                choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":(((choice["tier"]*5)+choice["rarity"]*10)*choice["quantity"])*6})
                         except Exception as e:
+                            print(str(e)+': '+str(choice))
                             continue
                 recipe["weighted_ings"].append(choice_cost)            
             recipe_cost.append({"name": recipe["name"], "ingredients":recipe["weighted_ings"],"exp_gain": recipe["exp_gain"]})
@@ -246,7 +248,7 @@ class CraftPath:
             o['name'] = rec['name']
             o['ingredients'] = []
             o['exp_gain'] = rec['exp_gain']
-            o['itemID'] = rec['itemID']
+            #o['itemID'] = rec['itemID']
             for items in rec['ingredients']:
                 try:
                     mincost = items[0]
