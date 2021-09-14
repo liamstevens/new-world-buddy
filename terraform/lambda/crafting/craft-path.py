@@ -197,6 +197,8 @@ class CraftPath:
                             #print(choices)
                             if "stone" in choices.lower() and len(choices) > 5:
                                 break
+                            if choices.lower().strip() == "water":
+                                choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":1})
                             if "mote" not in choices.lower():
                                 choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*1})
                             else:
@@ -215,6 +217,8 @@ class CraftPath:
                             if any(res in choice["name"].lower() for res in ["stone", "flint", "timber", "water", "leather", "oil", " ingot","lumber"]):
                                 if "stone" in choice["name"].lower() and len(choice) > 5:
                                     choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":(((choice["tier"]*5)+choice["rarity"]*10)*choice["quantity"])*6})
+                                elif choices.lower().strip() == "water":
+                                    choice_cost.append({"item":choice["name"], "quantity":choice['quantity'], "cost":1})
                                 elif "mote" not in choice["name"].lower():
                                     choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((1+1)*choice["quantity"])*1})
                                     #break #take the cheapest option
