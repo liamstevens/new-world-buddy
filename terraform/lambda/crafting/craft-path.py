@@ -201,7 +201,7 @@ class CraftPath:
                                 choice_cost.append({"item":choices, "quantity":ing["quantity"], "cost":(10*ing["quantity"]*10)})
                             elif choices.lower().strip() == "water":
                                 choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":1})
-                            elif any(magic_reagents in choices.lower() for magic_reagents in ["mote", "essence", "wisp"]):
+                            elif any(magic_reagents in choices.lower() for magic_reagents in ["mote", "essence", "wisp","quintessence"]):
                                 choice_cost.append({"item":choices, "quantity":ing["quantity"], "cost":(10*ing["quantity"]*10)})
                             elif not any(magic_reagents in choices.lower() for magic_reagents in ["mote", "essence", "wisp"]):
                                 choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*1})
@@ -214,10 +214,12 @@ class CraftPath:
                             #If material is a seal from faction vendors, weight it very highly to avoid selection
                             if "seal" in choices.lower():
                                 choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*1000})
-                            elif any(magic_reagents in choices.lower() for magic_reagents in ["mote", "essence", "wisp"]):
+                            elif any(magic_reagents in choices.lower() for magic_reagents in ["mote", "essence", "wisp","quintessence"]):
                                 choice_cost.append({"item":choices, "quantity":ing["quantity"], "cost":(10*ing["quantity"]*10)})
-                            elif any(res in choices.lower() for res in ["scaly hide","tolvium","glittering ebony","smolderhide", "etched handguard","cinnabar", "empowered counterbalance", "scarhide","sticky vines","putrid bark","brightscale hide","shifthide","azurite","coagulated blood", "spectral dust", "metallic boneweave", "corrupted talisman", "corrupted treatise", "mutagen","sparkling bone dust","petrified wood", "fae iron", "whisperwood","voidmetal","glintstrands","quillbark","scalecord","blessed crucible"]):
+                            elif any(res in choices.lower() for res in ["scaly hide","tolvium","glittering ebony","smolderhide","cinnabar",  "scarhide","brightscale hide","shifthide","azurite","petrified wood", "fae iron", "whisperwood","voidmetal","glintstrands","quillbark","scalecord","blessed crucible"]):
                                 choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((50)*ing["quantity"])*10})
+                            elif any(res in choices.lower() for res in ["etched handguard","empowered counterbalance","sticky vines","putrid bark","coagulated blood", "spectral dust", "metallic boneweave", "corrupted talisman", "corrupted treatise", "mutagen","sparkling bone dust"]):
+                                choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((5)*ing["quantity"])*10})
                             else:
                                 choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*10})
                             break
@@ -231,7 +233,7 @@ class CraftPath:
                                     choice_cost.append({"item":choice["name"], "quantity":choice['quantity'], "cost":1})
                                 elif any(res in choice['name'].lower() for res in ["petrified wood"]):
                                     choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((50)*ing["quantity"])*10})
-                                elif any(magic_reagents in choice['name'].lower() for magic_reagents in ["mote", "essence", "wisp"]):
+                                elif any(magic_reagents in choice['name'].lower() for magic_reagents in ["mote", "essence", "wisp","quintessence"]):
                                     choice_cost.append({"item":choice["name"], "quantity":choice["quantity"], "cost":((10+choice["rarity"]*10)*choice["quantity"])*10})
                                     #break #take the cheapest option
                                 else:
