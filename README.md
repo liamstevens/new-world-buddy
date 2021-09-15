@@ -5,3 +5,4 @@ This tool is designed to provide opinionated advice on optimised pathways to tak
 This repository contains the logic that drives the decision making process (currently in Python) as well as the infrastructure definition in Terraform. 
 ## Usage
 The tool was intended to be hosted at a web endpoint, but this has since shifted into a Discord bot. This also marks the pivot of the tool to a more general purpose API + interface via Discord.
+To use this repository you will need an AWS account to provision resources into as well as a host to run the bot on. In-depth usage information still to come.
