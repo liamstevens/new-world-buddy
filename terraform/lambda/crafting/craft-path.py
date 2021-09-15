@@ -219,7 +219,7 @@ class CraftPath:
                             elif any(res in choices.lower() for res in ["scaly hide","tolvium","glittering ebony","smolderhide","cinnabar",  "scarhide","brightscale hide","shifthide","azurite","petrified wood", "fae iron", "whisperwood","voidmetal","glintstrands","quillbark","scalecord","blessed crucible"]):
                                 choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((50)*ing["quantity"])*10})
                             elif any(res in choices.lower() for res in ["etched handguard","empowered counterbalance","sticky vines","putrid bark","coagulated blood", "spectral dust", "metallic boneweave", "corrupted talisman", "corrupted treatise", "mutagen","sparkling bone dust"]):
-                                choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((5)*ing["quantity"])*10})
+                                choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((20)*ing["quantity"])*10})
                             else:
                                 choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*10})
                             break
