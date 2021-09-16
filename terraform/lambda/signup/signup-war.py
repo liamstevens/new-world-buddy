@@ -6,19 +6,19 @@ def lambda_handler(event, context):
     client.put_item(
         TableName='WarRoster',
         Item={
-            "UserName": {
+            "username": {
                 "S": event["username"]
             },
-            "Level": {
+            "level": {
                 "N": (event["level"])
             },
-            "Weapon1": {
+            "weapon1": {
                 "S": event["weapon1"]
             },
-            "Weapon2": {
+            "weapon2": {
                 "S": event["weapon2"]
             },
-            "Role": {
+            "role": {
                 "S": event["role"]
             }
         }
