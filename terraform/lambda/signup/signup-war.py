@@ -1,5 +1,5 @@
 import boto3
-
+import json
 def lambda_handler(event, context):
     event = event["queryStringParameters"]
     client = boto3.client("dynamodb")
