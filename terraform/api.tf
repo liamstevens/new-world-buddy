@@ -46,7 +46,7 @@ resource "aws_apigatewayv2_route" "crafting" {
 resource "aws_apigatewayv2_integration" "signup" {
   api_id = aws_apigatewayv2_api.lambda.id
 
-  integration_uri    = aws_lambda_function.crafting.invoke_arn
+  integration_uri    = aws_lambda_function.signup.invoke_arn
   integration_type   = "AWS_PROXY"
   integration_method = "POST"
 }
@@ -55,7 +55,7 @@ resource "aws_apigatewayv2_route" "signup" {
   api_id = aws_apigatewayv2_api.lambda.id
 
   route_key = "GET /signup"
-  target    = "integrations/${aws_apigatewayv2_integration.crafting.id}"
+  target    = "integrations/${aws_apigatewayv2_integration.signup.id}"
 }
 
 
