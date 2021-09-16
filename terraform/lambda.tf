@@ -10,6 +10,11 @@ data "archive_file" "lambda_crafting" {
   output_path = "./lambda/crafting.zip"
 }
 
+data "archive_file" "lambda_signup" {
+  type        = "zip"
+  source_dir  = "./lambda/signup"
+  output_path = "./lambda/signup.zip"
+}
 resource "aws_s3_bucket_object" "lambda_crafting" {
   bucket = aws_s3_bucket.lambda_storage.id
 
@@ -17,6 +22,15 @@ resource "aws_s3_bucket_object" "lambda_crafting" {
   source = data.archive_file.lambda_crafting.output_path
 
   etag = filemd5(data.archive_file.lambda_crafting.output_path)
+}
+
+resource "aws_s3_bucket_object" "lambda_signup" {
+  bucket = aws_s3_bucket.lambda_storage.id
+
+  key    = "signup.zip"
+  source = data.archive_file.lambda_signup.output_path
+
+  etag = filemd5(data.archive_file.lambda_signup.output_path)
 }
 
 resource "aws_lambda_function" "crafting" {
@@ -32,10 +46,27 @@ resource "aws_lambda_function" "crafting" {
   memory_size      = "256"
 }
 
+resource "aws_lambda_function" "signup" {
+  function_name = "CraftingCalculator"
+
+  s3_bucket        = aws_s3_bucket.lambda_storage.id
+  s3_key           = aws_s3_bucket_object.lambda_signup.key
+  runtime          = "python3.7"
+  handler          = "signup-war.lambda_handler"
+  source_code_hash = data.archive_file.lambda_signup.output_base64sha256
+  role             = aws_iam_role.lambda_exec.arn
+  timeout          = "120"
+  memory_size      = "128"
+}
 
 
 resource "aws_cloudwatch_log_group" "crafting" {
   name              = "/aws/lambda/${aws_lambda_function.crafting.function_name}"
+  retention_in_days = 30
+}
+
+resource "aws_cloudwatch_log_group" "crafting" {
+  name              = "/aws/lambda/${aws_lambda_function.signup.function_name}"
   retention_in_days = 30
 }
 
