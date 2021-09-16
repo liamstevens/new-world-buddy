@@ -22,13 +22,13 @@ resource "aws_dynamodb_table" "recipe_table" {
   }
 }
 
-resource "aws_dynamodb_table" "recipe_table" {
-  name         = "WarRoster"
-  billing_mode = "PROVISIONED"
+resource "aws_dynamodb_table" "roster_table" {
+  name           = "WarRoster"
+  billing_mode   = "PROVISIONED"
   read_capacity  = 25
   write_capacity = 25
-  hash_key     = "username"
-  range_key    = "level"
+  hash_key       = "username"
+  range_key      = "level"
 
   attribute {
     name = "username"

@@ -65,7 +65,7 @@ resource "aws_cloudwatch_log_group" "crafting" {
   retention_in_days = 30
 }
 
-resource "aws_cloudwatch_log_group" "crafting" {
+resource "aws_cloudwatch_log_group" "signup" {
   name              = "/aws/lambda/${aws_lambda_function.signup.function_name}"
   retention_in_days = 30
 }
