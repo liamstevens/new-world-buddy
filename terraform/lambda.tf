@@ -54,7 +54,7 @@ resource "aws_lambda_function" "signup" {
   runtime          = "python3.7"
   handler          = "signup-war.lambda_handler"
   source_code_hash = data.archive_file.lambda_signup.output_base64sha256
-  role             = aws_iam_role.lambda_exec.arn
+  role             = aws_iam_role.signup_lambda_exec.arn
   timeout          = "120"
   memory_size      = "128"
 }
@@ -87,6 +87,23 @@ resource "aws_iam_role" "lambda_exec" {
   })
 }
 
+resource "aws_iam_role" "signup_lambda_exec" {
+  name = "serverless_lambda"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Sid    = ""
+      Principal = {
+        Service = "lambda.amazonaws.com"
+      }
+      }
+    ]
+  })
+}
+
 resource "aws_iam_role_policy_attachment" "lambda_policy" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
@@ -95,4 +112,9 @@ resource "aws_iam_role_policy_attachment" "lambda_policy" {
 resource "aws_iam_role_policy_attachment" "lambda_ddb_policy" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "signup_ddb_policy" {
+  role       = aws_iam_role.signup_lambda_exec.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
 }
