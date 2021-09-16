@@ -88,7 +88,7 @@ resource "aws_iam_role" "lambda_exec" {
 }
 
 resource "aws_iam_role" "signup_lambda_exec" {
-  name = "serverless_lambda"
+  name = "serverless_lambda_ddb_edit"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
