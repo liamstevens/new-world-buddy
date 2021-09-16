@@ -47,7 +47,7 @@ resource "aws_lambda_function" "crafting" {
 }
 
 resource "aws_lambda_function" "signup" {
-  function_name = "CraftingCalculator"
+  function_name = "WarSignup"
 
   s3_bucket        = aws_s3_bucket.lambda_storage.id
   s3_key           = aws_s3_bucket_object.lambda_signup.key
