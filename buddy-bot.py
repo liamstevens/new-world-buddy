@@ -42,7 +42,7 @@ async def get_crafting(ctx, profession: str, start_level: int, finish_level: int
 
 @bot.command(name="signup", help="Sign up for the next war.")
 async def signup(ctx, name: str, weapon1: str, weapon2: str, role: str, level:int):
-    weapons = ["hatchet","greataxe","life staff","sword/shield","rapier","fire staff","ice gauntlet","bow","musket","war hammer","spear"]
+    weapons = ["hatchet","greataxe","lifestaff","sword/shield","rapier","firestaff","icegauntlet","bow","musket","warhammer","spear"]
     if role.lower() in ["dps", "tank", "healer","ranged"] and set([weapon1.lower(), weapon2.lower()]).issubset(weapons):
         payload = {"name":name,"weapon1":weapon1,"weapon2":weapon2,"role":role,"level":level}
         r = requests.get(ENDPOINT+'/signup',params=payload)
@@ -54,6 +54,8 @@ async def signup(ctx, name: str, weapon1: str, weapon2: str, role: str, level:in
             embeddedTable.add_field(name = "Role", value = role, inline=True)
             embeddedTable.add_field(name = "Level", value = level, inline=True)
             await ctx.send(embed=embeddedTable)
+    else:
+        await ctx.send("Incorrect command format. Please check your parameters and try again.")
 
 
 
