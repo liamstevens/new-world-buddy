@@ -41,11 +41,12 @@ async def get_crafting(ctx, profession: str, start_level: int, finish_level: int
     await ctx.send(embed=embeddedTable)
 
 @bot.command(name="signup", help="Sign up for the next war.")
-async def signup(ctx, name: str, weapon1: str, weapon2: str, role: str, level:int):
+async def signup(ctx, name: str, weapon1: str, weapon2: str, role: str, level:str):
     weapons = ["hatchet","greataxe","lifestaff","sword/shield","rapier","firestaff","icegauntlet","bow","musket","warhammer","spear"]
     if role.lower() in ["dps", "tank", "healer","ranged"] and set([weapon1.lower(), weapon2.lower()]).issubset(weapons):
-        payload = {"name":name,"weapon1":weapon1,"weapon2":weapon2,"role":role,"level":level}
+        payload = {"username":name,"weapon1":weapon1,"weapon2":weapon2,"role":role,"level":level}
         r = requests.get(ENDPOINT+'/signup',params=payload)
+        print(r)
         if r.status_code == 200:
             embeddedTable = discord.Embed(title="Signup Info")
             embeddedTable.add_field(name = "Name", value = name, inline=True)

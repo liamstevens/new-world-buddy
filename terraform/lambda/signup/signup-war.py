@@ -10,7 +10,7 @@ def lambda_handler(event, context):
                 "S": event["username"]
             },
             "Level": {
-                "N": int(event["level"])
+                "N": (event["level"])
             },
             "Weapon1": {
                 "S": event["weapon1"]
