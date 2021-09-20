@@ -195,7 +195,7 @@ class CraftPath:
                 #TODO add tiebreakers based on item weight
                 for choice in choices:
                     if type(choices) == str:
-                        if any(res in choices.lower() for res in ["stone", "flint", "timber", "water", "leather", "oil", " ingot","lumber"]):
+                        if any(res in choices.lower() for res in ["stone", "flint", "timber", "water", "leather", "oil", " ingot", "ore","lumber"]):
                             #print(choices)
                             if "stone" in choices.lower() and len(choices) > 5:
                                 choice_cost.append({"item":choices, "quantity":ing["quantity"], "cost":(10*ing["quantity"]*10)})
@@ -203,8 +203,10 @@ class CraftPath:
                                 choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":1})
                             elif any(magic_reagents in choices.lower() for magic_reagents in ["mote", "essence", "wisp","quintessence"]):
                                 choice_cost.append({"item":choices, "quantity":ing["quantity"], "cost":(10*ing["quantity"]*10)})
+                            elif "ingot" in choices.lower():
+                                choice_cost.append({"item":choices, "quantity":ing["quantity"], "cost":(4*ing["quantity"]*1)})
                             elif not any(magic_reagents in choices.lower() for magic_reagents in ["mote", "essence", "wisp"]):
-                                choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*1})
+                                choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((2)*ing["quantity"])*1})
                             
                             
                             else:
@@ -216,12 +218,14 @@ class CraftPath:
                                 choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*1000})
                             elif any(magic_reagents in choices.lower() for magic_reagents in ["mote", "essence", "wisp","quintessence"]):
                                 choice_cost.append({"item":choices, "quantity":ing["quantity"], "cost":(10*ing["quantity"]*10)})
+                            elif any(gemstones in choices.lower() for gemstones in ["amber","amethyst","aquamarine","carnelian","citrine","diamond","emerald","garnet","jade","jasper","lapis","malachite","moonstone","onyx","opal","pearl","ruby","sapphire","topaz","turquoise"]):
+                                choice_cost.append({"item":choices, "quantity":ing["quantity"], "cost":(5*ing["quantity"]*1)})
                             elif any(res in choices.lower() for res in ["scaly hide","tolvium","glittering ebony","smolderhide","cinnabar",  "scarhide","brightscale hide","shifthide","azurite","petrified wood", "fae iron", "whisperwood","voidmetal","glintstrands","quillbark","scalecord","blessed crucible"]):
-                                choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((50)*ing["quantity"])*10})
-                            elif any(res in choices.lower() for res in ["etched handguard","empowered counterbalance","sticky vines","putrid bark","coagulated blood", "spectral dust", "metallic boneweave", "corrupted talisman", "corrupted treatise", "mutagen","sparkling bone dust"]):
-                                choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((20)*ing["quantity"])*10})
+                                choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((75)*ing["quantity"])*15})
+                            elif any(res in choices.lower() for res in ["etched handguard","jade collar", "jade talisman","empowered counterbalance","sticky vines","putrid bark","coagulated blood", "spectral dust", "metallic boneweave", "corrupted talisman", "corrupted treatise", "mutagen","sparkling bone dust"]):
+                                choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((150)*ing["quantity"])*20})
                             else:
-                                choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1+1)*ing["quantity"])*10})
+                                choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((1)*ing["quantity"])*5})
                             break
                     else:
                         try:
