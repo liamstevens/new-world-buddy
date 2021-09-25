@@ -12,6 +12,7 @@ bot = commands.Bot(command_prefix='!')
 
 @bot.command(name="craft", help="Calculates the best way to craft given a profession, starting level, and finishing level.")
 async def get_crafting(ctx, profession: str, start_level: int, finish_level: int):
+    print(profession, start_level, finish_level)
     profs = ["Arcana", "Armoring", "Weaponsmithing", "Leatherworking", "Weaving", "Smelting", "Engineering","Cooking","Furnishing","Stonecutting","Jewelcrafting", "Woodworking"]
     if profession.capitalize() not in profs:
         await ctx.send(f"You've provided an invalid profession. Please select from {profs}.")
