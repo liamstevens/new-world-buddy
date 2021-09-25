@@ -5,7 +5,7 @@ data "archive_file" "bot" {
 }
 
 resource "aws_s3_bucket" "bootstrap" {
-  name = "new-world-buddy-bootstrap"
+  bucket        = "new-world-buddy-bootstrap"
   acl           = "private"
   force_destroy = true
 }
@@ -60,17 +60,17 @@ resource "aws_iam_instance_profile" "bot_instance_profile" {
 }
 
 resource "aws_instance" "bot_instance" {
-    ami = "ami-0210560cedcb09f07"
-    instance_type = "t2.micro"
+  ami           = "ami-0210560cedcb09f07"
+  instance_type = "t2.micro"
 
-    subnet_id = aws_subnet.main_ap.id
-    security_groups = [aws_security_group.ssh_access.id]
-    user_data = <<EOF
+  subnet_id            = aws_subnet.main_ap.id
+  security_groups      = [aws_security_group.ssh_access.id]
+  user_data            = <<EOF
     aws s3 cp s3://new-world-buddy-bootstrap/bot.zip ./bot.zip
     unzip bot.zip
     yum install python3
     pip3 install ./bot/requirements.txt
     python3 ./bot/buddy-bot.py
     EOF
-    iam_instance_profile = aws_iam_instance_profile.bot_instance_profile.id
+  iam_instance_profile = aws_iam_instance_profile.bot_instance_profile.id
 }
