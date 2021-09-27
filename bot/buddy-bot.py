@@ -68,6 +68,7 @@ async def signup(ctx, name: str, weapon1: str, weapon2: str, role: str, level:st
 async def getroster(ctx):
     r = requests.get(ENDPOINT+'/getroster')
     rdict = json.loads(r.text)
+    print(rdict)
     if r.status_code == 200:
         name = ""
         weapon1 = ""
@@ -75,11 +76,11 @@ async def getroster(ctx):
         role = ""
         level = ""
         for e in rdict:
-            name+=f"{e['name']}\n"
-            weapon1+=f"{e['weapon1']}\n"
-            weapon2+=f"{e['weapon2']}\n"
-            role+=f"{e['role']}\n"
-            level+=f"{e['level']}\n"
+            name+=f"{e['username']['S'].capitalize()}\n"
+            weapon1+=f"{e['weapon1']['S'].capitalize()}\n"
+            weapon2+=f"{e['weapon2']['S'].capitalize()}\n"
+            role+=f"{e['role']['S'].capitalize()}\n"
+            level+=f"{e['level']['N']}\n"
         embeddedTable = discord.Embed(title="Company Roster")
         embeddedTable.add_field(name = "Name", value = name, inline=True)
         embeddedTable.add_field(name = "Weapon 1", value = weapon1, inline=True)
