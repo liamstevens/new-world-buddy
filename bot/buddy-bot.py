@@ -64,6 +64,29 @@ async def signup(ctx, name: str, weapon1: str, weapon2: str, role: str, level:st
         await ctx.send("Incorrect command format. Please check your parameters and try again.")
 
 
+@bot.command(name="getroster", help="Return the current roster.")
+async def getroster(ctx):
+    r = requests.get(ENDPOINT+'/getroster')
+    rdict = json.loads(r.text)
+    if r.status_code == 200:
+        name = ""
+        weapon1 = ""
+        weapon2 = ""
+        role = ""
+        level = ""
+        for e in rdict:
+            name+=f"{e['name']}\n"
+            weapon1+=f"{e['weapon1']}\n"
+            weapon2+=f"{e['weapon2']}\n"
+            role+=f"{e['role']}\n"
+            level+=f"{e['level']}\n"
+        embeddedTable = discord.Embed(title="Company Roster")
+        embeddedTable.add_field(name = "Name", value = name, inline=True)
+        embeddedTable.add_field(name = "Weapon 1", value = weapon1, inline=True)
+        embeddedTable.add_field(name = "Weapon 2", value = weapon2, inline=True)
+        embeddedTable.add_field(name = "Role", value = role, inline=True)
+        embeddedTable.add_field(name = "Level", value = level, inline=True)
+        await ctx.send(embed=embeddedTable)
 
 
 @bot.command(name="stathelp", help="Help us out with resource scarcity definitions. The bot will take input for as long as you will provide it, exit any time by replying with \"STOP\"")
