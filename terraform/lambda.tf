@@ -15,6 +15,12 @@ data "archive_file" "lambda_signup" {
   source_dir  = "./lambda/signup"
   output_path = "./lambda/signup.zip"
 }
+
+data "archive_file" "lambda_getroster" {
+  type        = "zip"
+  source_dir  = "./lambda/getroster"
+  output_path = "./lambda/getroster.zip"
+}
 resource "aws_s3_bucket_object" "lambda_crafting" {
   bucket = aws_s3_bucket.lambda_storage.id
 
@@ -32,6 +38,16 @@ resource "aws_s3_bucket_object" "lambda_signup" {
 
   etag = filemd5(data.archive_file.lambda_signup.output_path)
 }
+
+resource "aws_s3_bucket_object" "lambda_getroster" {
+  bucket = aws_s3_bucket.lambda_storage.id
+
+  key    = "getroster.zip"
+  source = data.archive_file.lambda_getroster.output_path
+
+  etag = filemd5(data.archive_file.lambda_getroster.output_path)
+}
+
 
 resource "aws_lambda_function" "crafting" {
   function_name = "CraftingCalculator"
@@ -59,6 +75,18 @@ resource "aws_lambda_function" "signup" {
   memory_size      = "128"
 }
 
+resource "aws_lambda_function" "getroster" {
+  function_name = "GetRoster"
+
+  s3_bucket        = aws_s3_bucket.lambda_storage.id
+  s3_key           = aws_s3_bucket_object.lambda_getroster.key
+  runtime          = "python3.7"
+  handler          = "get-roster.lambda_handler"
+  source_code_hash = data.archive_file.lambda_getroster.output_base64sha256
+  role             = aws_iam_role.lambda_exec.arn
+  timeout          = "120"
+  memory_size      = "128"
+}
 
 resource "aws_cloudwatch_log_group" "crafting" {
   name              = "/aws/lambda/${aws_lambda_function.crafting.function_name}"
@@ -67,6 +95,11 @@ resource "aws_cloudwatch_log_group" "crafting" {
 
 resource "aws_cloudwatch_log_group" "signup" {
   name              = "/aws/lambda/${aws_lambda_function.signup.function_name}"
+  retention_in_days = 30
+}
+
+resource "aws_cloudwatch_log_group" "getroster" {
+  name              = "/aws/lambda/${aws_lambda_function.getroster.function_name}"
   retention_in_days = 30
 }
 
