@@ -8,7 +8,7 @@ from discord.ext import commands
 TOKEN = os.environ['DISCORD_TOKEN']
 ENDPOINT = os.environ['API_ENDPOINT']
 
-bot = commands.Bot(command_prefix='!')
+bot = commands.Bot(command_prefix='@')
 
 @bot.command(name="craft", help="Calculates the best way to craft given a profession, starting level, and finishing level.")
 async def get_crafting(ctx, profession: str, start_level: int, finish_level: int):
