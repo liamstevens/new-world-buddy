@@ -220,7 +220,9 @@ class CraftPath:
                                 choice_cost.append({"item":choices, "quantity":ing["quantity"], "cost":(10*ing["quantity"]*10)})
                             elif any(gemstones in choices.lower() for gemstones in ["amber","amethyst","aquamarine","carnelian","citrine","diamond","emerald","garnet","jade","jasper","lapis","malachite","moonstone","onyx","opal","pearl","ruby","sapphire","topaz","turquoise"]):
                                 choice_cost.append({"item":choices, "quantity":ing["quantity"], "cost":(5*ing["quantity"]*1)})
-                            elif any(res in choices.lower() for res in ["scaly hide","tolvium","glittering ebony","smolderhide","cinnabar",  "scarhide","brightscale hide","shifthide","azurite","petrified wood", "fae iron", "whisperwood","voidmetal","glintstrands","quillbark","scalecord","blessed crucible"]):
+                            elif any(reagents in choices.lower() for reagents in ["weave", "tannin", "flux", "solvent"]):
+                                choice_cost.append({"item":choices, "quantity":ing["quantity"], "cost":(5*ing["quantity"]*1)})
+                            elif any(res in choices.lower() for res in ["scaly hide", "fur", "tolvium","glittering ebony","smolderhide","cinnabar",  "scarhide","brightscale hide","shifthide","azurite","petrified wood", "fae iron", "whisperwood","voidmetal","glintstrands","quillbark","scalecord","blessed crucible"]):
                                 choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((75)*ing["quantity"])*15})
                             elif any(res in choices.lower() for res in ["etched handguard","jade collar", "jade talisman","empowered counterbalance","sticky vines","putrid bark","coagulated blood", "spectral dust", "metallic boneweave", "corrupted talisman", "corrupted treatise", "mutagen","sparkling bone dust"]):
                                 choice_cost.append({"item":choices, "quantity":ing['quantity'], "cost":((150)*ing["quantity"])*20})
